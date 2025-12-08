@@ -1,0 +1,472 @@
+{
+	"info": {
+		"_postman_id": "43e71b15-3e7c-4e2e-ae24-ac16bdb3c036",
+		"name": "HRMSP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26945192"
+	},
+	"item": [
+		{
+			"name": "get user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/arena/api1/user/get_info/176",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"arena",
+						"api1",
+						"user",
+						"get_info",
+						"176"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "10001",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "123456",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/arena/api1/auth/login",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"arena",
+						"api1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "user_id",
+							"value": "176",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/arena/api1/auth/logout",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"arena",
+						"api1",
+						"auth",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "profile update",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "user_id",
+							"value": "176",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/api1/profile/update_profile",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api1",
+						"profile",
+						"update_profile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "change password",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "new_password",
+							"value": "123456",
+							"type": "text"
+						},
+						{
+							"key": "new_password_confirm",
+							"value": "123456",
+							"type": "text"
+						},
+						{
+							"key": "user_id",
+							"value": "176",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/arena/api1/user/change_password",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"arena",
+						"api1",
+						"user",
+						"change_password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get attendance",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "user_id",
+							"value": "176",
+							"description": "\n",
+							"type": "text"
+						},
+						{
+							"key": "month",
+							"value": "10",
+							"type": "text"
+						},
+						{
+							"key": "year",
+							"value": "2025",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/arena/api1/attendance/get_attendance",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"arena",
+						"api1",
+						"attendance",
+						"get_attendance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "month attendance",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "user_id",
+							"value": "176",
+							"type": "text"
+						},
+						{
+							"key": "month",
+							"value": "10",
+							"type": "text"
+						},
+						{
+							"key": "year",
+							"value": "2025",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/arena/api1/attendance/month_log",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"arena",
+						"api1",
+						"attendance",
+						"month_log"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "leave list",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "user_id",
+							"value": "176",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/arena/api1/leave/list",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"arena",
+						"api1",
+						"leave",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add leave",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "user_id",
+							"value": "176",
+							"type": "text"
+						},
+						{
+							"key": "leave_type_id",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "from_date",
+							"value": "2025-02-01",
+							"type": "text"
+						},
+						{
+							"key": "to_date",
+							"value": "2025-02-03",
+							"type": "text"
+						},
+						{
+							"key": "reason",
+							"value": "test",
+							"type": "text"
+						},
+						{
+							"key": "remarks",
+							"value": "test",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/arena/api1/leave/add",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"arena",
+						"api1",
+						"leave",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "workreport",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "user_id",
+							"value": "176",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/api1/workreport/task_list",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api1",
+						"workreport",
+						"task_list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "projects",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FyZW5hLmNyZWF0aXZlY3Jvd3MuY28uaW4vIiwiaWF0IjoxNzYyNzc4MjkzLCJleHAiOjE3NjI3ODE4OTMsImRhdGEiOnsidXNlcl9pZCI6IjE3NiIsInVzZXJuYW1lIjoiMTAwMDEiLCJlbWFpbCI6IiJ9fQ.r0sdWGd846Zp_fUqVN6h5A6YWb2WjV6DOXEoVPwAqdI",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "user_id",
+							"value": "176",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/api1/project/project_list",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api1",
+						"project",
+						"project_list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "announcement",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FyZW5hLmNyZWF0aXZlY3Jvd3MuY28uaW4vIiwiaWF0IjoxNzYyNzc4MjkzLCJleHAiOjE3NjI3ODE4OTMsImRhdGEiOnsidXNlcl9pZCI6IjE3NiIsInVzZXJuYW1lIjoiMTAwMDEiLCJlbWFpbCI6IiJ9fQ.r0sdWGd846Zp_fUqVN6h5A6YWb2WjV6DOXEoVPwAqdI",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "user_id",
+							"value": "176",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseURL}}/api1/announcement/announcement_list",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api1",
+						"announcement",
+						"announcement_list"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "",
+			"type": "default"
+		}
+	]
+}

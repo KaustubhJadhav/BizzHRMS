@@ -1,0 +1,1461 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="https://hrms.bizz100.com/uploads/logo/favicon/favicon_1764227667.png" >
+
+    <!-- Title -->
+    <title>HR Software | Workable Zone</title>
+
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/animate.css/animate.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/jscrollpane/jquery.jscrollpane.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/waves/waves.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/chartist/chartist.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/switchery/dist/switchery.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/select2/dist/css/select2.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/DataTables/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/DataTables/Responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/DataTables/Buttons/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/DataTables/Buttons/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/clockpicker/dist/bootstrap-clockpicker.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/bootstrap-tagsinput/dist/bootstrap-tagsinput.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/Trumbowyg/dist/ui/trumbowyg.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/toastr/toastr.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/summernote/summernote.css">
+	<link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/jquery-ui/jquery-ui.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/kendo/kendo.common.min.css" />
+	<link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/kendo/kendo.default.min.css" />
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/jquery-wizard/dist/css/wizard.min.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/ion.rangeSlider/css/ion.rangeSlider.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/ion.rangeSlider/css/ion.rangeSlider.skinFlat.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/css/core.css">
+    <link rel="stylesheet" href="https://hrms.bizz100.com/skin/css/xin_custom.css">
+
+    <!-- HTML5 Shiv and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+<!-- firebase config start -->
+    <!-- Firebase SDK v8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "[REDACTED]",
+  authDomain: "hrms-application-f694a.firebaseapp.com",
+  projectId: "hrms-application-f694a",
+  storageBucket: "hrms-application-f694a.firebasestorage.app",
+  messagingSenderId: "373740729197",
+  appId: "1:373740729197:web:23dd14a4b13288ba8f2064",
+  measurementId: "G-HCXXDNBFLM"
+};
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+
+// register service worker (you said SW file is in project root)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/firebase-messaging-sw.js')
+    .then((reg) => {
+      messaging.useServiceWorker(reg);
+
+      // request permission and get token
+      messaging.requestPermission()
+        .then(() => messaging.getToken())
+        .then((token) => {
+            console.log('ADMIN WEB FCM TOKEN:', token);
+
+            // send token to server (Dashboard controller)
+            fetch("https://hrms.bizz100.com/dashboard/save_fcm_token", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: token })
+            }).then(r => r.json()).then(d => console.log(d)).catch(e => console.error(e));
+        })
+        .catch(err => {
+            console.warn('FCM permission/token error:', err);
+        });
+    })
+    .catch(err => console.error('SW register failed', err));
+}
+
+// handle messages in foreground
+messaging.onMessage(function(payload) {
+  console.log('Foreground message:', payload);
+  // show simple toast (you can replace with Swal/Toastr)
+  const t = document.createElement('div');
+  t.style = 'position:fixed;right:20px;top:20px;background:#333;color:#fff;padding:12px;border-radius:6px;z-index:99999';
+  t.innerHTML = `<b>${payload.notification.title}</b><div>${payload.notification.body}</div>`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),5000);
+});
+</script>
+<!-- firebase config end -->
+</head><body class="large-sidebar  fixed-header fixed-sidebar  static skin-6 ">
+	<div class="wrapper">
+		<div class="preloader"></div>
+		<!-- Sidebar -->
+		<div class="site-sidebar-overlay"></div>
+		<!-- menu start-->
+
+<div class="site-sidebar">
+  <div class="custom-scroll custom-scroll-light">
+    <ul class="sidebar-menu">
+            <li class="menu-title">Main</li>
+      <li> <a href="https://hrms.bizz100.com/dashboard" class="waves-effect waves-light"> <span class="s-icon"><i class="fa fa-home"></i></span> <span class="s-text">Dashboard</span> </a> </li>
+      
+            <li class="with-sub"> <a href="javascript:void(0);" class="waves-effect  waves-light"> <span class="s-caret"><i class="fa fa-angle-down"></i></span> <span class="s-icon"><i class="fa fa-clock-o"></i></span> <span class="s-text">Attendance</span> </a>
+        <ul>
+                    <li><a href="https://hrms.bizz100.com/timesheet/attendance/">Attendance</a></li>
+                              <li><a href="https://hrms.bizz100.com/timesheet/date_wise_attendance/">Date wise Attendance</a></li>
+                              <li><a href="https://hrms.bizz100.com/timesheet/update_attendance/">Update Attendance</a></li>
+                              <li><a href="https://hrms.bizz100.com/timesheet/import/">Import Attendance</a></li>
+                              <li><a href="https://hrms.bizz100.com/timesheet/leave/">Leaves</a></li>
+                              <li><a href="https://hrms.bizz100.com/timesheet/office_shift/">Office Shifts</a></li>
+                              <li><a href="https://hrms.bizz100.com/timesheet/holidays/">Holidays</a></li>
+                                                </ul>
+      </li>
+                  <li class="with-sub"> <a href="javascript:void(0);" class="waves-effect  waves-light"> <span class="s-caret"><i class="fa fa-angle-down"></i></span> <span class="s-icon"><i class="ti-user"></i></span> <span class="s-text">Employee Master</span> </a>
+        <ul>
+                    <li><a href="https://hrms.bizz100.com/employees">Employees</a></li>
+                              <li><a href="https://hrms.bizz100.com/roles">Set Roles</a></li>
+                           <li><a href="https://hrms.bizz100.com/awards">Awards</a></li>
+                              <li><a href="https://hrms.bizz100.com/transfers">Transfers</a></li>
+                              <li><a href="https://hrms.bizz100.com/resignation">Resignations</a></li>
+                              <li><a href="https://hrms.bizz100.com/travel">Travels</a></li>
+                              <li><a href="https://hrms.bizz100.com/promotion">Promotions</a></li>
+                              <li><a href="https://hrms.bizz100.com/complaints">Complaints</a></li>
+                              <li><a href="https://hrms.bizz100.com/warning">Warnings</a></li>
+                              <li><a href="https://hrms.bizz100.com/termination">Terminations</a></li>
+                              <li><a href="https://hrms.bizz100.com/employees_last_login">Employees Last Login</a></li>
+                                        <li><a href="https://hrms.bizz100.com/employee_exit">Employees Exit</a></li>
+                            </ul>
+      </li>
+                  <li class="with-sub"> <a href="javascript:void(0);" class="waves-effect  waves-light"> <span class="s-caret"><i class="fa fa-angle-down"></i></span> <span class="s-icon"><i class="fa fa-building-o"></i></span> <span class="s-text">More</span> </a>
+        <ul>
+                    <li><a href="https://hrms.bizz100.com/company">Company</a></li>
+                              <li><a href="https://hrms.bizz100.com/location">Branch</a></li>
+                              <li><a href="https://hrms.bizz100.com/department">Department</a></li>
+                              <li><a href="https://hrms.bizz100.com/designation">Designation</a></li>
+                              <li><a href="https://hrms.bizz100.com/announcement">Announcements</a></li>
+                              <li><a href="https://hrms.bizz100.com/policy">Policies</a></li>
+                             <li><a href="https://hrms.bizz100.com/expense">Expense</a></li>
+                  </ul>
+      </li>
+            
+            <li class="with-sub"> <a href="javascript:void(0);" class="waves-effect  waves-light"> <span class="s-caret"><i class="fa fa-angle-down"></i></span> <span class="s-icon"><i class="fa fa-dribbble"></i></span> <span class="s-text">Performance</span> </a>
+        <ul>
+                    <li><a href="https://hrms.bizz100.com/performance_indicator">Performance Indicator</a></li>
+                              <li><a href="https://hrms.bizz100.com/performance_appraisal">Performance Appraisal</a></li>
+                  </ul>
+      </li>
+            
+            <li class="with-sub"> <a href="javascript:void(0);" class="waves-effect  waves-light"> <span class="s-caret"><i class="fa fa-angle-down"></i></span> <span class="s-icon"><i class="fa fa-calculator"></i></span> <span class="s-text">Payroll</span> </a>
+        <ul>
+                    <li><a href="https://hrms.bizz100.com/payroll/templates/">Payroll Templates</a></li>
+                              <li><a href="https://hrms.bizz100.com/payroll/hourly_wages/">Hourly Wages</a></li>
+                              <li><a href="https://hrms.bizz100.com/payroll/manage_salary/">Manage Salary</a></li>
+                              <li><a href="https://hrms.bizz100.com/payroll/advance_salary">Advance Salary</a></li>
+                              <li><a href="https://hrms.bizz100.com/payroll/advance_salary_report">Advance Salary Report</a></li>
+                              <li><a href="https://hrms.bizz100.com/payroll/generate_payslip/">Generate Payslip</a></li>
+                              <li><a href="https://hrms.bizz100.com/payroll/payment_history/">Payment History</a></li>
+                  </ul>
+      </li>
+       
+            <li> <a href="https://hrms.bizz100.com/project" class="waves-effect waves-light"> <span class="s-icon"><i class="ti-layers-alt"></i></span> <span class="s-text">Projects</span> </a> </li>
+                  <li> <a href="https://hrms.bizz100.com/timesheet/tasks" class="waves-effect waves-light"> <span class="s-icon"><i class="fa fa-tasks"></i></span> <span class="s-text">Work Report</span> </a> </li>
+                  <li> <a href="https://hrms.bizz100.com/tickets" class="waves-effect waves-light"> <span class="s-icon"><i class="fa fa-ticket"></i></span> <span class="s-text">Tickets</span> </a> </li>
+                  <li class="with-sub"> <a href="javascript:void(0);" class="waves-effect  waves-light"> <span class="s-caret"><i class="fa fa-angle-down"></i></span> <span class="s-icon"><i class="fa fa-newspaper-o"></i></span> <span class="s-text">Recruitment</span> </a>
+        <ul>
+                    <li><a href="https://hrms.bizz100.com/job_post">Job Posts</a></li>
+                              <li><a href="https://hrms.bizz100.com/frontend/jobs/" target="_blank">Jobs Listing <small>frontend</small></a></li>
+                              <li><a href="https://hrms.bizz100.com/job_candidates">Job Candidates</a></li>
+                              <li><a href="https://hrms.bizz100.com/job_interviews">Job Interviews</a></li>
+                  </ul>
+      </li>
+                  <li class="with-sub"> <a href="javascript:void(0);" class="waves-effect  waves-light"> <span class="s-caret"><i class="fa fa-angle-down"></i></span> <span class="s-icon"><i class="fa fa-mortar-board"></i></span> <span class="s-text">Training</span> </a>
+        <ul>
+                    <li><a href="https://hrms.bizz100.com/training">Training List</a></li>
+                              <li><a href="https://hrms.bizz100.com/training_type">Training Type</a></li>
+                              <li><a href="https://hrms.bizz100.com/trainers">Trainers List</a></li>
+                  </ul>
+      </li>
+                  <li> <a href="https://hrms.bizz100.com/files" class="waves-effect waves-light"> <span class="s-icon"><i class=" fa fa-file"></i></span> <span class="s-text">Files Manager</span> </a> </li>
+                  <li> <a href="https://hrms.bizz100.com/employees/directory" class="waves-effect waves-light"> <span class="s-icon"><i class="fa fa-database"></i></span> <span class="s-text">Employees Directory</span> </a> </li>
+                              <li class="menu-title">Accounting</li>
+        <li class="with-sub"> <a href="javascript:void(0);" class="waves-effect  waves-light"> <span class="s-caret"><i class="fa fa-angle-down"></i></span> <span class="s-icon"><i class="fa fa-university"></i></span> <span class="s-text">Accounts</span> </a>
+        <ul>
+                        <li><a href="https://hrms.bizz100.com/accounting/bank_cash">Accounts List</a></li>
+                                    <li><a href="https://hrms.bizz100.com/accounting/account_balances">Account Balances</a></li>
+                    </ul>
+        </li>
+                        <li class="with-sub"> <a href="javascript:void(0);" class="waves-effect  waves-light"> <span class="s-caret"><i class="fa fa-angle-down"></i></span> <span class="s-icon"><i class="fa fa-money"></i></span> <span class="s-text">Transactions</span> </a>
+        <ul>
+                        <li><a href="https://hrms.bizz100.com/accounting/deposit">Deposit</a></li>
+                                    <li><a href="https://hrms.bizz100.com/accounting/expense">Expense</a></li>
+                                    <li><a href="https://hrms.bizz100.com/accounting/transfer">Transfer</a></li>
+                                    <li><a href="https://hrms.bizz100.com/accounting/transactions">View Transactions</a></li>
+                    </ul>
+        </li>
+                          <li class="with-sub"> <a href="javascript:void(0);" class="waves-effect  waves-light"> <span class="s-caret"><i class="fa fa-angle-down"></i></span> <span class="s-icon"><i class="fa fa-exchange"></i></span> <span class="s-text">Payees and payers</span> </a>
+        <ul>
+                        <li><a href="https://hrms.bizz100.com/accounting/payees">Payees</a></li>
+                                    <li><a href="https://hrms.bizz100.com/accounting/payers">Payers</a></li>
+                    </ul>
+        </li>
+        </li>
+                        <li class="with-sub"> <a href="javascript:void(0);" class="waves-effect  waves-light"> <span class="s-caret"><i class="fa fa-angle-down"></i></span> <span class="s-icon"><i class="fa fa-bar-chart-o"></i></span> <span class="s-text">Reports</span> </a>
+        <ul>
+                        <li><a href="https://hrms.bizz100.com/accounting/account_statement">Account Statement</a></li>
+             
+                        <li><a href="https://hrms.bizz100.com/accounting/expense_report">Expense Report</a></li>
+             
+                        <li><a href="https://hrms.bizz100.com/accounting/income_report">Income Report</a></li>
+             
+                        <li><a href="https://hrms.bizz100.com/accounting/transfer_report">Transfer Report</a></li>
+             
+        </ul>
+        </li>  
+             
+       
+            <li class="menu-title">More</li>
+                  <li> <a href="https://hrms.bizz100.com/settings/" class="waves-effect waves-light"> <span class="s-icon"><i class="ti-settings"></i></span> <span class="s-text">Settings</span> </a> </li>
+                  <li> <a href="https://hrms.bizz100.com/settings/constants" class="waves-effect waves-light"> <span class="s-icon"><i class="ti-menu"></i></span> <span class="s-text">Constants</span> </a> </li>
+                  <li> <a href="https://hrms.bizz100.com/settings/database_backup/" class="waves-effect waves-light"> <span class="s-icon"><i class="fa fa-database"></i></span> <span class="s-text">Database Backup</span> </a> </li>
+                  <li> <a href="https://hrms.bizz100.com/settings/email_template/" class="waves-effect waves-light"> <span class="s-icon"><i class="fa fa-envelope-o"></i></span> <span class="s-text">Email Templates</span> </a> </li>
+                  <li> <a href="https://hrms.bizz100.com/logout" class="waves-effect waves-light"> <span class="s-icon"><i class="fa fa-sign-out"></i></span> <span class="s-text">Logout</span> </a> </li>
+          </ul>
+  </div>
+</div>
+<!-- menu end--> 
+        
+		<!-- Header -->
+		<div class="template-options">
+  <div class="to-toggle"><i class="ti-settings"></i></div>
+  <div class="custom-scroll custom-scroll-dark">
+  <ul class="nav nav-tabs nav-tabs-2 m-b-0-5" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#layout" role="tab" aria-expanded="true">Layout Settings</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tab_setting" role="tab" aria-expanded="false">Other Setting</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+    <div class="tab-pane active" id="layout" role="tabpanel" aria-expanded="true">            
+    <form id="layout_skin_info" action="https://hrms.bizz100.com/settings/layout_skin_info/" name="layout_skin_info" method="post">
+      <input type="hidden" name="token" value="1DR59ik46kLKR4E" />
+      <div class="to-content">
+              <h5><strong>Layouts</strong></h5>
+        <div class="row text-xs-center">
+          <div class="col-xs-6 mb-2">
+            <div class="to-item">
+              <label>
+              <input name="fixed-header" type="checkbox" value="fixed-header"  checked="checked" >
+              <div class="to-icon"><i class="ti-check"></i></div>
+              <img src="https://hrms.bizz100.com/skin/img/layouts/fixed-header.png" class="img-fluid">
+              </label>
+              <div class="text-muted">Fixed Header</div>
+            </div>
+          </div>
+          <div class="col-xs-6 mb-2">
+            <div class="to-item">
+              <label>
+              <input name="fixed-sidebar" type="checkbox" value="fixed-sidebar"  checked="checked" >
+              <div class="to-icon"><i class="ti-check"></i></div>
+              <img src="https://hrms.bizz100.com/skin/img/layouts/sticky-sidebar.png" class="img-fluid">
+              </label>
+              <div class="text-muted">Sticky Sidebar</div>
+            </div>
+          </div>
+          <div class="col-xs-6 mb-2">
+            <div class="to-item">
+              <label>
+              <input name="boxed-wrapper" type="checkbox" value="boxed-wrapper" >
+              <div class="to-icon"><i class="ti-check"></i></div>
+              <img src="https://hrms.bizz100.com/skin/img/layouts/boxed-wrapper.png" class="img-fluid">
+              </label>
+              <div class="text-muted">Boxed Wrapper</div>
+            </div>
+          </div>
+          <div class="col-xs-6 mb-2">
+            <div class="to-item">
+              <label>
+              <input name="static" type="checkbox" value="static"  checked="checked" >
+              <div class="to-icon"><i class="ti-check"></i></div>
+              <img src="https://hrms.bizz100.com/skin/img/layouts/static.png" class="img-fluid">
+              </label>
+              <div class="text-muted">Static</div>
+            </div>
+          </div>
+        </div>
+                <h5><strong>Skins</strong></h5>
+        <div class="row">
+          <div class="col-xs-3 mb-2">
+            <label class="skin-label">
+            <input name="skin" value="skin-default" type="radio" >
+            <div class="to-icon"><i class="ti-check"></i></div>
+            <div class="to-skin"> <span class="skin-dark-blue"></span> <span class="skin-white"></span> <span class="skin-dark-blue"></span> </div>
+            </label>
+          </div>
+          <div class="col-xs-3 mb-2">
+            <label class="skin-label">
+            <input name="skin" value="skin-1" type="radio" >
+            <div class="to-icon"><i class="ti-check"></i></div>
+            <div class="to-skin"> <span class="skin-dark-blue-2"></span> <span class="skin-dark-blue-2"></span> <span class="bg-white"></span> </div>
+            </label>
+          </div>
+          <div class="col-xs-3 mb-2">
+            <label class="skin-label">
+            <input name="skin" value="skin-2" type="radio" >
+            <div class="to-icon"><i class="ti-check"></i></div>
+            <div class="to-skin"> <span class="bg-danger"></span> <span class="bg-white"></span> <span class="bg-black"></span> </div>
+            </label>
+          </div>
+          <div class="col-xs-3 mb-2">
+            <label class="skin-label">
+            <input name="skin" value="skin-3" type="radio" >
+            <div class="to-icon"><i class="ti-check"></i></div>
+            <div class="to-skin"> <span class="bg-white"></span> <span class="bg-white"></span> <span class="bg-white"></span> </div>
+            </label>
+          </div>
+          <div class="col-xs-3 mb-2">
+            <label class="skin-label">
+            <input name="skin" value="skin-4" type="radio" >
+            <div class="to-icon"><i class="ti-check"></i></div>
+            <div class="to-skin"> <span class="bg-white"></span> <span class="skin-dark-blue-2"></span> <span class="bg-white"></span> </div>
+            </label>
+          </div>
+          <div class="col-xs-3 mb-2">
+            <label class="skin-label">
+            <input name="skin" value="skin-5" type="radio" >
+            <div class="to-icon"><i class="ti-check"></i></div>
+            <div class="to-skin"> <span class="bg-primary-light"></span> <span class="bg-primary"></span> <span class="bg-white"></span> </div>
+            </label>
+          </div>
+          <div class="col-xs-3 mb-2">
+            <label class="skin-label">
+            <input name="skin" value="skin-6" type="radio"  checked="checked" >
+            <div class="to-icon"><i class="ti-check"></i></div>
+            <div class="to-skin"> <span class="bg-black"></span> <span class="bg-info"></span> <span class="bg-black"></span> </div>
+            </label>
+          </div>
+        </div>
+        <div class="to-material">
+          <button type="submit" class="btn-block waves-effect waves-light mb-2 btn btn-primary save">Update</button>
+        </div>
+      </div>
+    </form></div>
+    
+    <div class="tab-pane" id="tab_setting" role="tabpanel">
+    <form id="sidebar_setting_info" action="https://hrms.bizz100.com/settings/sidebar_setting_info/" name="sidebar_setting_info" method="post">
+      <input type="hidden" name="token" value="1DR59ik46kLKR4E" />
+        <div class="sidebar-settings animated fadeIn">
+            <div class="sidebar-group">
+                <h6>Main</h6>
+                <div class="ss-item">
+                    <div class="text-truncate">Enable attendance system</div>
+                    <div class="ss-checkbox"><input type="checkbox" id="enable_attendance" class="js-switch" data-size="small" data-color="#3e70c9"  checked="checked"  value="yes"></div>
+                </div>
+                <div class="ss-item">
+                    <div class="text-truncate">Enable Jobs for employees</div>
+                    <div class="ss-checkbox"><input type="checkbox" id="enable_job" class="js-switch" data-size="small" data-color="#3e70c9"  value="yes"></div>
+                </div>
+                <div class="ss-item">
+                    <div class="text-truncate">Employee can change profile background image</div>
+                    <div class="ss-checkbox"><input type="checkbox" class="js-switch" data-size="small" data-color="#3e70c9"  checked="checked"  value="yes" id="enable_profile_background"></div>
+                </div>
+            </div>
+            <div class="sidebar-group">
+                <h6>Notificatiоns</h6>
+                <div class="ss-item">
+                    <div class="text-truncate">Enable email notifications</div>
+                    <div class="ss-checkbox"><input type="checkbox" class="js-switch" data-size="small" data-color="#3e70c9"  checked="checked"  value="yes" id="role_email_notification"></div>
+                </div>
+                <div class="ss-item">
+                    <div class="text-truncate">Enable notification close button</div>
+                    <div class="ss-checkbox"><input type="checkbox" class="js-switch" data-size="small" data-color="#3e70c9"  checked="checked"  value="true" id="close_btn"></div>
+                </div>
+                <div class="ss-item">
+                    <div class="text-truncate">Notification progress Bar</div>
+                    <div class="ss-checkbox"><input type="checkbox" class="js-switch" data-size="small" data-color="#3e70c9"  checked="checked"  value="true" id="notification_bar"></div>
+                </div>
+            </div>
+            <div class="sidebar-group">
+                <h6>Other</h6>
+                <div class="ss-item">
+                    <div class="text-truncate">Enable policy link on top</div>
+                    <div class="ss-checkbox"><input type="checkbox" class="js-switch" data-size="small" data-color="#3e70c9"  checked="checked"  value="yes" id="role_policy_link"></div>
+                </div>
+                <div class="ss-item">
+                    <div class="text-truncate">Enable layout setting</div>
+                    <div class="ss-checkbox"><input type="checkbox" class="js-switch" data-size="small" data-color="#3e70c9"  checked="checked"  value="yes" id="enable_layout"></div>
+                </div>
+            </div>
+        </div>
+        <div class="to-material">
+          <button type="submit" class="btn-block waves-effect waves-light mb-2 btn btn-primary save">Update</button>
+        </div>
+        </form>
+					</div>
+                    
+                    </div>
+  </div>
+</div>
+<div class="site-header">
+  <nav class="navbar navbar-dark">
+    <div class="navbar-left"> <a class="navbar-brand" href="https://hrms.bizz100.com/dashboard/"> 
+      <!--Workable Zone-->
+      <div class="logo"></div>
+      </a>
+      <div class="toggle-button dark sidebar-toggle-first float-xs-left hidden-md-up" data-toggle-tooltip="tooltip" data-placement="bottom" data-title="Sidebar" data-original-title="" title=""> <span class="hamburger"></span> </div>
+      <div class="toggle-button dark float-xs-right hidden-md-up" data-toggle="collapse" data-target="#collapse-1" data-toggle-tooltip="tooltip" data-placement="bottom" data-title="Sidebar" data-original-title="" title=""> <span class="more"></span> </div>
+    </div>
+    <div class="navbar-right navbar-toggleable-sm collapse" id="collapse-1">
+      <div class="toggle-button dark sidebar-toggle-second float-xs-left hidden-sm-down" data-toggle-tooltip="tooltip" data-placement="bottom" data-title="Sidebar" data-original-title="" title=""> <span class="hamburger"></span> </div>
+      <ul class="nav navbar-nav float-md-right">
+        <li class="nav-item dropdown"> 
+        <a class="nav-link" href="#" data-toggle="dropdown" aria-expanded="false"> <img src="https://hrms.bizz100.com/skin/img/flags/en.gif" alt="English"> English</a>
+        <div class="dropdown-menu dropdown-menu-right animated pulse">
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/chineese">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/cn.gif" alt="Chinese"> Chinese
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/danish">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/dk.gif" alt="Danish"> Danish
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/english">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/en.gif" alt="English"> English
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/french">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/fr.gif" alt="French"> French
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/german">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/de.gif" alt="German"> German
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/greek">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/gr.gif" alt="Greek"> Greek
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/indonesian">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/id.gif" alt="Indonesian"> Indonesian
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/italian">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/ie.gif" alt="Italian"> Italian
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/japanese">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/jp.gif" alt="Japanese"> Japanese
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/polish">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/pl.gif" alt="Polish"> Polish
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/portuguese">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/pt.gif" alt="Portuguese"> Portuguese
+                </a> 
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/romanian">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/ro.gif" alt="Romanian"> Romanian
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/russian">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/ru.gif" alt="Spanish"> Russian
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/spanish">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/es.gif" alt="Spanish"> Spanish
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/turkish">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/tr.gif" alt="Spanish"> Turkish
+                </a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/dashboard/set_language/vietnamese">
+                    <img src="https://hrms.bizz100.com/skin/img/flags/vn.gif" alt="Vietnamese"> Vietnamese
+                </a>         
+            </div>
+        </li>
+                <!--<li class="nav-item"> <a class="nav-link" href="#" data-toggle="modal" data-target=".policy"> <i class="fa fa-product-hunt"></i> <span class="hidden-md-up ml-1">Policies</span></a> </li>-->
+                        <li class="nav-item dropdown"> <a class="nav-link" href="#" data-toggle="dropdown" aria-expanded="false"> <i class="ti-bell"></i> <span class="hidden-md-up ml-1">Notifications</span> </a>
+          <div class="dropdown-messages dropdown-tasks dropdown-menu dropdown-menu-right animated pulse">
+                                                            <div class="m-item">
+              <div class="mi-icon bg-info"><i class="ti-comment"></i></div>
+              <div class="mi-text"><a class="text-black" href="https://hrms.bizz100.com/timesheet/leave_details/id/25/">Demo User</a> <span class="text-muted">has applied for leave</span></div>
+              <div class="mi-time">26-Nov-2025</div>
+            </div>
+                                                            <div class="m-item">
+              <div class="mi-icon bg-info"><i class="ti-comment"></i></div>
+              <div class="mi-text"><a class="text-black" href="https://hrms.bizz100.com/timesheet/leave_details/id/24/">Demo User</a> <span class="text-muted">has applied for leave</span></div>
+              <div class="mi-time">26-Nov-2025</div>
+            </div>
+                                                            <div class="m-item">
+              <div class="mi-icon bg-info"><i class="ti-comment"></i></div>
+              <div class="mi-text"><a class="text-black" href="https://hrms.bizz100.com/timesheet/leave_details/id/23/">Demo User</a> <span class="text-muted">has applied for leave</span></div>
+              <div class="mi-time">26-Nov-2025</div>
+            </div>
+                                                            <div class="m-item">
+              <div class="mi-icon bg-info"><i class="ti-comment"></i></div>
+              <div class="mi-text"><a class="text-black" href="https://hrms.bizz100.com/timesheet/leave_details/id/21/">Demo User</a> <span class="text-muted">has applied for leave</span></div>
+              <div class="mi-time">19-Nov-2025</div>
+            </div>
+                        <a class="dropdown-more" href="https://hrms.bizz100.com/timesheet/leave/"> <strong>View all leave</strong> </a> </div>
+        </li>
+                        <li class="nav-item dropdown"> <a class="nav-link" href="#" data-toggle="dropdown" aria-expanded="false" data-placement="bottom"> <i class="ti-settings"></i> <span class="hidden-md-up ml-1">Settings</span> </a>
+          <div class="dropdown-menu dropdown-menu-right animated pulse">
+                        <a class="dropdown-item" href="https://hrms.bizz100.com/settings/"> Configuration </a>
+                                    <!--<a class="dropdown-item" href="https://hrms.bizz100.com/settings/constants/"> Constants </a>-->
+                                    <a class="dropdown-item" href="https://hrms.bizz100.com/settings/email_template/"> Email Templates </a>
+                                    <!--<a class="dropdown-item" href="https://hrms.bizz100.com/settings/database_backup/"> Backup Database Log </a>-->
+                      </div>
+        </li>
+                
+        <li class="nav-item dropdown hidden-sm-down">
+            <a href="#" data-toggle="dropdown" aria-expanded="false">
+                <span class="avatar box-32">
+                                                                                                    <img src="https://hrms.bizz100.com/uploads/profile/default_male.jpg" alt="" id="user_avatar" class=" b-a-radius-circle user_profile_avatar">
+                                    </span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right animated pulse">
+                <a class="dropdown-item" href="https://hrms.bizz100.com/profile/">
+                    <i class="ti-user mr-0-5"></i> My Profile                </a>
+                                <a class="dropdown-item" href="https://hrms.bizz100.com/settings/">
+                    <i class="ti-settings mr-0-5"></i> Settings                </a>
+                                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="javascript:void(0);" data-toggle="modal" data-target=".pro_change_password" data-profile_id="1"><i class="fa fa-key mr-0-5"></i> Change Password</a>
+                <a class="dropdown-item" href="https://hrms.bizz100.com/logout/"><i class="ti-power-off mr-0-5"></i> Sign out</a>
+            </div>
+        </li>
+      </ul>
+      <style>
+            .breadcrumb-item + .breadcrumb-item::before {
+                color: #fff !important;
+            }
+      </style>
+      <ul class="nav navbar-nav">
+        <li class="nav-item hidden-sm-down"> <a class="nav-link toggle-fullscreen" href="#"> <i class="ti-fullscreen"></i> </a> </li>
+        <li class="nav-item hidden-sm-down">
+            <ol class="breadcrumb no-bg mb-1" style="margin-top:19px;">
+				<li class="breadcrumb-item"><a class="text-white" href="https://hrms.bizz100.com/dashboard">Home</a></li>
+				<li class="breadcrumb-item text-white active">Dashboard</li>
+			</ol>
+		</li>
+       
+                        
+      </ul>
+    </div>
+  </nav>
+</div>
+<div class="modal fade pro_change_password animated pulse" id="pro_change_password" tabindex="-1" role="dialog" aria-labelledby="pro_change_password" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="change_password_modal"></div>
+  </div>
+</div>
+<div class="modal fade policy animated pulse" id="policy" tabindex="-1" role="dialog" aria-labelledby="policy" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" id="policy_modal"></div>
+  </div>
+</div>
+		<div class="site-content">
+			<!-- Content -->
+			<div class="content-area py-1">
+				<div class="container-fluid">
+					<!--<h4>Dashboard</h4>-->
+					<!--<ol class="breadcrumb no-bg mb-1">
+						<li class="breadcrumb-item"><a href="https://hrms.bizz100.com/dashboard">Home</a></li>
+						<li class="breadcrumb-item active">Dashboard</li>
+					</ol>-->
+                    					<style>
+    .boxBorder{
+        padding: 20px;
+        text-align: center;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .ddate{
+        padding: 10px 16px;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        font-size: 16px;
+        font-weight: bold;
+        color: #2c2c2c;
+        outline: none;
+        cursor: pointer;
+        margin-top:-12px;
+    }
+    .card-item .count {
+      font-weight: bold;
+      color: #000;
+      float:right;
+    }
+    .card.box {
+  height: 100% !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+</style>
+<div class="row row-md mb-1">
+    <div class="col-lg-12">
+        <div class="">
+            <label for="branch" style="font-weight: bold; margin-right: 10px;">Branch :</label>
+            <select id="branch" name="branch" style="
+                padding: 8px 12px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 16px;
+                min-width: 250px;
+              ">
+                                                <option  value="4">Main</option>
+                                            </select>
+        </div>
+        
+    </div>
+</div>
+<div class="row row-md mb-1">
+    <div class="col-lg-9">
+        <div class="card box box-block bg-white">
+            <h2 class=""><strong>Attendance </strong> Report Center</h2>
+            <div class="add-record-btn">
+              <input type="date" value="2025-12-03" id="attendance_date1" class="ddate">
+            </div>
+            <div class="row">
+                <div class="col-lg-4">
+                    <a href="https://hrms.bizz100.com/employees">
+                        <div class="boxBorder">
+                            <div style="color: #8A2BE2;">Total</div>
+                            <div style="font-size: 24px; color: #8A2BE2;">1</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4">
+                    <a href="https://hrms.bizz100.com/timesheet/attendance_per?attendance_date=2025-12-03&statusTime=Present&branch=">
+                        <div class="boxBorder">
+                            <div style="color: green;">Present</div>
+                            <div style="font-size: 24px; color: green;">0</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4">
+                    <a href="https://hrms.bizz100.com/timesheet/attendance_per?attendance_date=2025-12-03&statusTime=Absent&branch=">
+                        <div class="boxBorder">
+                            <div style="color: red;">Absent</div>
+                            <div style="font-size: 24px; color: red;">1</div>
+                        </div>
+                    </a>
+                </div>
+                <!-- <div class="col-lg-3">
+                    <a href="https://hrms.bizz100.com/timesheet/attendance_per?attendance_date=2025-12-03&statusTime=Present&branch=">
+                        <div class="boxBorder">
+                            <div style="color: orange;">Half Day</div>
+                            <div style="font-size: 24px; color: orange;"></div>
+                        </div>
+                    </a>
+                </div> -->
+            </div>
+            <div class="row">
+                <!-- <div class="col-lg-3">
+                    <a href="https://hrms.bizz100.com/timesheet/attendance_per?attendance_date=2025-12-03&statusTime=Present&branch=">
+                        <div class="boxBorder">
+                            <div style="color: #8A2BE2;">Late Commers</div>
+                            <div style="font-size: 24px; color: #8A2BE2;"></div>
+                        </div>
+                    </a>
+                </div> -->
+                <div class="col-lg-4">
+                    <a href="https://hrms.bizz100.com/timesheet/attendance_per?attendance_date=2025-12-03&statusTime=Holiday&branch=">
+                        <div class="boxBorder">
+                            <div style="color: dodgerblue;">Holiday</div>
+                            <div style="font-size: 24px; color: dodgerblue;">0</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4">
+                    <a href="https://hrms.bizz100.com/timesheet/attendance_per?attendance_date=2025-12-03&statusTime=OnBreak&branch=">
+                        <div class="boxBorder">
+                            <div style="color: #00bcd4;">On Break</div>
+                            <div style="font-size: 24px; color: #00bcd4;">0</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-4">
+                    <a href="https://hrms.bizz100.com/timesheet/attendance_per?attendance_date=2025-12-03&statusTime=OnLeave&branch=">
+                        <div class="boxBorder">
+                            <div style="color: #ffc107;">On Leave</div>
+                            <div style="font-size: 24px; color: #ffc107;">0</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+          
+          
+            <div class="card-block"> <a class="btn btn-primary btn-block" href="timesheet/attendance">Details Attendence View</a> </div>
+        </div>
+        
+    </div>
+    <div class="col-lg-3">
+        <div class="card box box-block bg-white">
+            <h2 ><div class="card-header-icon">🎁 <strong>TO DO </strong> Todays Work</div></h2>
+            <div class="items-list">
+                <div class="il-item" style="padding:1rem 1rem;"> 
+                <a class="text-black" href="https://hrms.bizz100.com/employees/?Birthday=2025-12-03">
+                  <div class="card-item">
+                    <span><i class="icon-birthday">🎂</i>Today Birthday and Anniversary</span>
+                    <div class="count">0</div>
+                  </div>
+                  <div class="il-icon"><i class="fa fa-angle-right"></i></div>
+                  </a> 
+                </div>
+                <!--<div class="il-item" style="padding:1rem 1rem;"> -->
+                <!--<a class="text-black" href="https://hrms.bizz100.com/timesheet/leave/?leave=1">-->
+                <!--  <div class="card-item">-->
+                <!--    <span><i class="icon-leave">➔</i>Pending Leave Request</span>-->
+                <!--    <div class="count">1</div>-->
+                <!--  </div>-->
+                <!--  <div class="il-icon"><i class="fa fa-angle-right"></i></div>-->
+                <!--  </a> -->
+                <!--</div>-->
+                <div class="il-item" style="padding:1rem 1rem;"> 
+                <a class="text-black" href="https://hrms.bizz100.com/payroll/payment_history/?paymentStatus=2">
+                  <div class="card-item">
+                    <span><i class="icon-payment">👤</i>Pending Payment Request</span>
+                    <div class="count">0</div>
+                  </div>
+                  <div class="il-icon"><i class="fa fa-angle-right"></i></div>
+                  </a> 
+                </div>
+                <!--<div class="il-item" style="padding:1rem 1rem;"> -->
+                <!--   <a class="text-black" href="https://hrms.bizz100.com/timesheet/miss_punch_request/">-->
+                <!--  <div class="card-item">-->
+                <!--    <span><i class="icon-punch">➔</i>Pending Miss Punch Request</span>-->
+                <!--    <div class="count">0</div>-->
+                <!--  </div>-->
+                <!--  <div class="il-icon"><i class="fa fa-angle-right"></i></div>-->
+                <!--  </a> -->
+                <!--</div>-->
+                <!--<div class="il-item" style="padding:1.1rem 1rem;"> -->
+                <!--<a class="text-black" href="https://hrms.bizz100.com/timesheet/ot_request/">-->
+                <!--  <div class="card-item">-->
+                <!--    <span><i class="icon-punch">➔</i>Pending OT Request</span>-->
+                <!--    <div class="count">0</div>-->
+                <!--  </div>-->
+                <!--  <div class="il-icon"><i class="fa fa-angle-right"></i></div>-->
+                <!--  </a> -->
+                <!--</div>-->
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row row-md mb-1">
+    <!--<div class="col-lg-6">-->
+    <!--    <div class="card box box-block bg-white">-->
+    <!--        <h2><div class="card-header-icon">💳  <strong>Payment </strong> Staff Payment Summary</div>-->
+    <!--        <select class="border rounded-md px-2 py-1 text-sm shadow-sm payment-monthly" style="float: right;margin-top: -40px;border-color: white;"  -->
+    <!--    onchange="handleMonthChange(this)">-->
+    <!--            -->
+    <!--            -->
+    <!--            <option value="2025-12">2025 Dec</option>-->
+    <!--            -->
+    <!--            <option value="2025-11">2025 Nov</option>-->
+    <!--            -->
+    <!--            <option value="2025-10">2025 Oct</option>-->
+    <!--            -->
+    <!--            <option value="2025-09">2025 Sep</option>-->
+    <!--            -->
+    <!--            -->
+                <!-- Add more months -->
+    <!--          </select>-->
+    <!--        </h2>-->
+    <!--        <div class="items-list">-->
+    <!--            <div class="il-item" style="padding:1.63rem 1.25rem;"> -->
+    <!--            <a class="text-black" href="">-->
+    <!--              <div class="card-item">-->
+    <!--                <span><b>Old Balance</b></span>-->
+    <!--                <div class="count" id="oldBal">0</div>-->
+    <!--              </div>-->
+    <!--              <div class="il-icon"><i class="fa fa-angle-right"></i></div>-->
+    <!--              </a> -->
+    <!--            </div>-->
+    <!--            <div class="il-item" style="padding:1.63rem 1.25rem;"> -->
+    <!--            <a class="text-black" href="">-->
+    <!--              <div class="card-item">-->
+    <!--                <span><b>Payable Salary</b></span>-->
+    <!--                <div class="count"  id="payableSalary">0</div>-->
+    <!--              </div>-->
+    <!--              <div class="il-icon"><i class="fa fa-angle-right"></i></div>-->
+    <!--              </a> -->
+    <!--            </div>-->
+    <!--            <div class="il-item" style="padding:1.63rem 1.25rem;"> -->
+    <!--            <a class="text-black" href="">-->
+    <!--              <div class="card-item">-->
+    <!--                <span><b>Allowance &amp; Bonus</b></span>-->
+    <!--                <div class="count"  id="bonus"></div>-->
+    <!--              </div>-->
+    <!--              <div class="il-icon"><i class="fa fa-angle-right"></i></div>-->
+    <!--              </a> -->
+    <!--            </div>-->
+    <!--            <div class="il-item" style="padding:1.63rem 1.25rem;"> -->
+    <!--            <a class="text-black" href="">-->
+    <!--              <div class="card-item">-->
+    <!--                <span><b>Deduction</b></span>-->
+    <!--                <div class="count"  id="deduction"></div>-->
+    <!--              </div>-->
+    <!--              <div class="il-icon"><i class="fa fa-angle-right"></i></div>-->
+    <!--              </a> -->
+    <!--            </div>-->
+    <!--            <div class="il-item" style="padding:1.63rem 1.25rem;"> -->
+    <!--            <a class="text-black" href="">-->
+    <!--              <div class="card-item">-->
+    <!--                <span style="font-size: 20px;"><b>Net Payable</b></span>-->
+    <!--                <div class="count">₹ <span id="netP"></span></div>-->
+    <!--              </div>-->
+    <!--              <div class="il-icon"><i class="fa fa-angle-right"></i></div>-->
+    <!--              </a> -->
+    <!--            </div>-->
+    <!--        </div>-->
+    <!--        <div class="card-block"> <a class="btn btn-primary btn-block" href="payroll/payment_history/">View Details →</a> </div>-->
+    <!--    </div>-->
+        
+    <!--</div>-->
+    <!--<div class="col-md-6">
+    <div class="card box box-block bg-white">
+      <h2><strong>New</strong> Employees</h2>
+                  <div class="items-list">
+        <div class="il-item" style="padding:0.63rem 1.25rem;"> <a class="text-black" href="https://hrms.bizz100.com/employees/detail/186/">
+          <div class="media">
+            <div class="media-left">
+              <div class="avatar box-48"> <img class="b-a-radius-0-125" src="https://hrms.bizz100.com/uploads/profile/default_male.jpg" alt=""> </div>
+            </div>
+            <div class="media-body">
+              <h6 class="media-heading">Demo User</h6>
+              <span class="text-muted">Other</span> </div>
+          </div>
+          <div class="il-icon"><i class="fa fa-angle-right"></i></div>
+          </a> </div>
+      </div>
+                  <div class="items-list">
+        <div class="il-item" style="padding:0.63rem 1.25rem;"> <a class="text-black" href="https://hrms.bizz100.com/employees/detail/1/">
+          <div class="media">
+            <div class="media-left">
+              <div class="avatar box-48"> <img class="b-a-radius-0-125" src="https://hrms.bizz100.com/uploads/profile/default_male.jpg" alt=""> </div>
+            </div>
+            <div class="media-body">
+              <h6 class="media-heading">Super Admin</h6>
+              <span class="text-muted">Other</span> </div>
+          </div>
+          <div class="il-icon"><i class="fa fa-angle-right"></i></div>
+          </a> </div>
+      </div>
+            <div class="card-block"> <a class="btn btn-primary btn-block" href="employees">Show more</a> </div>
+    </div>
+  </div>-->
+    <div class="col-lg-12">
+        <div class="card box box-block bg-white">
+            <h2 ><div class="card-header-icon">🏦 <strong>Loan </strong> Summary of Loan</div></h2>
+            <div class="items-list">
+                <div class="il-item" style="padding:1.63rem 1.25rem;"> 
+                
+                  <div class="card-item" style="height: 65px;">
+                    <span style="font-size: 20px;"><b>Loan Given</b></span>
+                    <div class="count">0</div>
+                  </div>
+                  <div class="il-icon"><i class="fa fa-angle-right"></i></div>
+                  
+                </div>
+                <div class="il-item" style="padding:1.63rem 1.25rem;"> 
+                
+                  <div class="card-item" style="height: 65px;">
+                    <span style="font-size: 20px;"><b>Loan Received</b></span>
+                    <div class="count">0</div>
+                  </div>
+                  <div class="il-icon"><i class="fa fa-angle-right"></i></div>
+                  
+                </div>
+                <div class="il-item" style="padding:1.63rem 1.25rem;"> 
+                
+                  <div class="card-item" style="height: 65px;">
+                    <span style="font-size: 20px;"><b>Loan Balance</b></span>
+                    <div class="count">0</div>
+                  </div>
+                  <div class="il-icon"><i class="fa fa-angle-right"></i></div>
+                 
+                </div>
+                
+            </div>
+            <div class="card-block" > <a class="btn btn-primary btn-block" href="payroll/advance_salary/">View Details →</a> </div>
+        </div>
+    </div>
+    
+</div>
+<div class="row row-md mb-1" >
+    <div class="col-lg-6">
+        <div class="card box box-block bg-white">
+            <h2><div class="card-header-icon">💳  <strong>Advance Payment</strong> Summary of Advances</div>
+            <select class="border rounded-md px-2 py-1 text-sm shadow-sm payment-monthly payment-monthly-advance" style="float: right;margin-top: -40px;border-color: white;"  
+        onchange="handleMonthChangeAdvance(this)">
+                                                <option value="2025-12">2025 Dec</option>
+                                <option value="2025-11">2025 Nov</option>
+                                <option value="2025-10">2025 Oct</option>
+                                <option value="2025-09">2025 Sep</option>
+                                                <!-- Add more months -->
+              </select>
+            </h2>
+            <table style="width: 100%; margin-top: 15px; border-collapse: collapse;">
+              <thead>
+                <tr style="border-bottom: 1px solid #ddd;">
+                  <th style="text-align: left; padding: 8px;">Date</th>
+                  <th style="text-align: right; padding: 8px;">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="advance-data">
+                <tr><td colspan="2" style="text-align:center;">Loading...</td></tr>
+              </tbody>
+            </table>
+
+   
+            <div class="card-block"> <a class="btn btn-primary btn-block" href="payroll/advance_salary">View Details →</a> </div>
+        </div>
+        
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card box box-block bg-white">
+            <h2><div class="card-header-icon">🏦  <strong>Statutory Expenses</strong> Duties & Taxes</div>
+            <select class="border rounded-md px-2 py-1 text-sm shadow-sm payment-monthly payment-monthly-expences" style="float: right;margin-top: -40px;border-color: white;"  
+        onchange="handleMonthChangeexpences(this)">
+                                                <option value="2025-12">2025 Dec</option>
+                                <option value="2025-11">2025 Nov</option>
+                                <option value="2025-10">2025 Oct</option>
+                                <option value="2025-09">2025 Sep</option>
+                                                <!-- Add more months -->
+              </select>
+            </h2>
+            <table style="width: 100%; margin-top: 15px; border-collapse: collapse;">
+              <thead>
+                <tr style="border-bottom: 1px solid #ddd;">
+                  <th style="text-align: left; padding: 8px;">Employee</th>
+                  <th style="text-align: left; padding: 8px;">Expenses Type</th>
+                  <th style="text-align: right; padding: 8px;">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="expences-data">
+                <tr><td colspan="2" style="text-align:center;">Loading...</td></tr>
+              </tbody>
+            </table>
+
+   
+            <div class="card-block"> <a class="btn btn-primary btn-block" href="expense">View Details →</a> </div>
+        </div>
+        
+    </div>
+</div>
+
+
+<div class="row row-md mb-1">
+    <!--<div class="col-lg-6">-->
+    <!--    <div class="card box box-block bg-white">-->
+    <!--        <h2><div class="card-header-icon">💰  <strong>Allowance/Deduction/Bonus</strong> </div>-->
+    <!--        <select class="border rounded-md px-2 py-1 text-sm shadow-sm payment-monthly" style="float: right;margin-top: -40px;border-color: white;"  -->
+    <!--    onchange="handleMonthChange(this)">-->
+    <!--            -->
+    <!--            -->
+    <!--            <option value="2025-12">2025 Dec</option>-->
+    <!--            -->
+    <!--            <option value="2025-11">2025 Nov</option>-->
+    <!--            -->
+    <!--            <option value="2025-10">2025 Oct</option>-->
+    <!--            -->
+    <!--            <option value="2025-09">2025 Sep</option>-->
+    <!--            -->
+    <!--            -->
+                <!-- Add more months -->
+    <!--          </select>-->
+    <!--        </h2>-->
+    <!--        <div class="items-list">-->
+    <!--            <div class="il-item" style="padding:1.63rem 1.25rem;"> -->
+    <!--            <a class="text-black" href="">-->
+    <!--              <div class="card-item">-->
+    <!--                <span><b>Type</b></span>-->
+    <!--                <div class="count" id="">Amount</div>-->
+    <!--              </div>-->
+    <!--              <div class="il-icon"><i class="fa fa-angle-right"></i></div>-->
+    <!--              </a> -->
+    <!--            </div>-->
+    <!--            <div class="il-item" style="padding:1.63rem 1.25rem;"> -->
+    <!--            <a class="text-black" href="">-->
+    <!--              <div class="card-item">-->
+    <!--                <span><b>Allowance</b></span>-->
+    <!--                <div class="count"  id="bonus1">0</div>-->
+    <!--              </div>-->
+    <!--              <div class="il-icon"><i class="fa fa-angle-right"></i></div>-->
+    <!--              </a> -->
+    <!--            </div>-->
+    <!--            <div class="il-item" style="padding:1.63rem 1.25rem;"> -->
+    <!--            <a class="text-black" href="">-->
+    <!--              <div class="card-item">-->
+    <!--                <span><b>Deduction</b></span>-->
+    <!--                <div class="count"  id="deduction1"></div>-->
+    <!--              </div>-->
+    <!--              <div class="il-icon"><i class="fa fa-angle-right"></i></div>-->
+    <!--              </a> -->
+    <!--            </div>-->
+    <!--            <div class="il-item" style="padding:1.63rem 1.25rem;"> -->
+    <!--            <a class="text-black" href="">-->
+    <!--              <div class="card-item">-->
+    <!--                <span><b>Bonus</b></span>-->
+    <!--                <div class="count"  id="deduction">0</div>-->
+    <!--              </div>-->
+    <!--              <div class="il-icon"><i class="fa fa-angle-right"></i></div>-->
+    <!--              </a> -->
+    <!--            </div>-->
+                
+    <!--        </div>-->
+
+   
+    <!--        <div class="card-block"> <a class="btn btn-primary btn-block" href="payroll/payment_history/">View Details →</a> </div>-->
+    <!--    </div>-->
+        
+    <!--</div>-->
+    
+    <div class="col-lg-6">
+        <div class="card box box-block bg-white">
+            <h2><div class="card-header-icon">📝   <strong>Job Work Report</strong> Work Update</div>
+            <select class="border rounded-md px-2 py-1 text-sm shadow-sm payment-monthly payment-monthly-work" style="float: right;margin-top: -40px;border-color: white;"  
+        onchange="handleMonthChangeexpences(this)">
+                                                <option value="2025-12">2025 Dec</option>
+                                <option value="2025-11">2025 Nov</option>
+                                <option value="2025-10">2025 Oct</option>
+                                <option value="2025-09">2025 Sep</option>
+                                                <!-- Add more months -->
+              </select>
+            </h2>
+            <table style="width: 100%; margin-top: 15px; border-collapse: collapse;">
+              <thead>
+                <tr style="border-bottom: 1px solid #ddd;">
+                  <th style="text-align: left; padding: 8px;">Employee</th>
+                  <th style="text-align: left; padding: 8px;">Task Name</th>
+                  <th style="text-align: right; padding: 8px;">Progress</th>
+                </tr>
+              </thead>
+              <tbody id="work-data">
+                <tr><td colspan="3" style="text-align:center;">Loading...</td></tr>
+              </tbody>
+            </table>
+
+   
+            <div class="card-block"> <a class="btn btn-primary btn-block" href="timesheet/tasks">View Details →</a> </div>
+        </div>
+        
+    </div>
+    
+    <!---->
+</div>
+
+
+
+<div class="row row-md mb-1">
+      
+  <!--<div class="col-md-6">
+    <div class="card box box-block bg-white">
+      <h2><strong>Recruitment</strong> Timeline</h2>
+      <div class="">
+        <div class="notifications">
+                  </div>
+      </div>
+    </div>
+  </div>-->
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+
+    $(document).on('change', '.payment-monthly', function() {
+        let selectedMonth = $(this).val();
+        console.log("Month changed to:", selectedMonth);
+        $.ajax({
+          url: 'https://hrms.bizz100.com/dashboard/update_paymentMounth',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            selectedMonth: selectedMonth
+          },
+          success: function(response) {
+            if (response && response.message) {
+                 
+                 $("#oldBal").text(response.message.old_balance);
+                 $("#payableSalary").text(response.message.payable_amount);
+                 $("#bonus").text(response.message.total_allowances);
+                 $("#bonus1").text(response.message.total_allowances);
+                 $("#deduction").text(response.message.tax_deduction);
+                 $("#deduction1").text(response.message.tax_deduction);
+                 $("#netP").text(response.message.net_salary);
+              
+            } else {
+              $("#oldBal").text("-");
+                 $("#payableSalary").text("-");
+                 $("#bonus").text("-");
+                 $("#bonus1").text("-");
+                 $("#deduction").text("-");
+                 $("#deduction1").text("-");
+                 $("#netP").text("-");
+            }
+          },
+          error: function(xhr, status, error) {
+            alert('AJAX Error: ' + xhr.responseText);
+          }
+        });
+    });
+    
+    function loadAdvanceData(month) {
+      $.ajax({
+        url: 'https://hrms.bizz100.com/dashboard/update_paymentMounthAdvance',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          selectedMonth: month
+        },
+        success: function(response) {
+          let html = "";
+    
+          if (response.length > 0) {
+            $.each(response, function(index, item){
+              html += `<tr style="border-top: 1px solid #ddd; border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px;">${item.created_at}</td>
+                        <td style="text-align:right; padding: 10px;">₹ ${item.advance_amount}</td>
+                       </tr>`;
+            });
+          } else {
+            html = `<tr><td colspan="2" style="text-align:center;">No Data Found</td></tr>`;
+          }
+    
+          $("#advance-data").html(html);
+        },
+        error: function() {
+          $("#advance-data").html(`<tr><td colspan="2" style="text-align:center;color:red;">Error loading data</td></tr>`);
+        }
+      });
+    }
+    
+    // Trigger on dropdown change
+    $(document).on('change', '.payment-monthly-advance', function() {
+      let selectedMonth = $(this).val();
+      loadAdvanceData(selectedMonth);
+    });
+    
+    // ✅ Trigger manually on page load
+    $(document).ready(function () {
+      let selectedMonth = $('.payment-monthly-advance').val();
+      if (selectedMonth) {
+        loadAdvanceData(selectedMonth);
+      }
+    });
+    
+    function loadexpencesData(month) {
+      $.ajax({
+        url: 'https://hrms.bizz100.com/dashboard/update_paymentMounthexpences',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          selectedMonth: month
+        },
+        success: function(response) {
+          let html = "";
+    
+          if (response.length > 0) {
+            $.each(response, function(index, item){
+              html += `<tr style="border-top: 1px solid #ddd; border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px;">${item.first_name} ${item.last_name}</td>
+                        <td style="text-align:right; padding: 10px;"> ${item.expense_type_name}</td>
+                        <td style="text-align:right; padding: 10px;">₹ ${item.amount}</td>
+                       </tr>`;
+            });
+          } else {
+            html = `<tr><td colspan="3" style="text-align:center;">No Data Found</td></tr>`;
+          }
+    
+          $("#expences-data").html(html);
+        },
+        error: function() {
+          $("#expences-data").html(`<tr><td colspan="2" style="text-align:center;color:red;">Error loading data</td></tr>`);
+        }
+      });
+    }
+    
+    // Trigger on dropdown change
+    $(document).on('change', '.payment-monthly-expences', function() {
+      let selectedMonth = $(this).val();
+      loadexpencesData(selectedMonth);
+    });
+    
+    // ✅ Trigger manually on page load
+    $(document).ready(function () {
+      let selectedMonth = $('.payment-monthly-expences').val();
+      if (selectedMonth) {
+        loadexpencesData(selectedMonth);
+      }
+    });
+    
+    function loadworkData(month) {
+      $.ajax({
+        url: 'https://hrms.bizz100.com/dashboard/update_paymentMounthwork',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          selectedMonth: month
+        },
+        success: function(response) {
+          let html = "";
+    
+          if (response.length > 0) {
+            $.each(response, function(index, item){
+              html += `<tr style="border-top: 1px solid #ddd; border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px;">${item.first_name} ${item.last_name}</td>
+                        <td style="text-align:right; padding: 10px;"> ${item.task_name}</td>
+                        <td style="text-align:right; padding: 10px;">${item.task_progress} %</td>
+                       </tr>`;
+            });
+          } else {
+            html = `<tr><td colspan="3" style="text-align:center;">No Data Found</td></tr>`;
+          }
+    
+          $("#work-data").html(html);
+        },
+        error: function() {
+          $("#work-data").html(`<tr><td colspan="3" style="text-align:center;color:red;">Error loading data</td></tr>`);
+        }
+      });
+    }
+    
+    // Trigger on dropdown change
+    $(document).on('change', '.payment-monthly-work', function() {
+      let selectedMonth = $(this).val();
+      loadworkData(selectedMonth);
+    });
+    
+    // ✅ Trigger manually on page load
+    $(document).ready(function () {
+      let selectedMonth = $('.payment-monthly-work').val();
+      if (selectedMonth) {
+        loadworkData(selectedMonth);
+      }
+    });
+   
+   
+   
+    
+</script>
+				  </div>
+			</div>
+			<!-- Footer -->
+			<footer class="footer">
+    <div class="container-fluid">
+        2025 © BIZZ-HRMS-Product by CCTPL         - 
+        Page rendered in <strong>0.0677</strong> seconds.             </div>
+</footer>		</div>
+	</div>
+	
+	
+<div class="modal fade delete-modal animated pulse" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">×</span> </button>
+        <strong class="modal-title">Are you sure you want to delete this record?</strong> </div>
+      <div class="alert alert-danger alert-dismissible fade in m-b-0" role="alert"> <strong>Record deleted can't be restored!!!</strong> </div>
+      <div class="modal-footer">
+        <form id="delete_record" name="delete_record" role="form" action="" method="post">
+          <input name="_method" type="hidden" value="DELETE">
+          <input name="_token" type="hidden" value="">
+          <input name="token_type" id="token_type" type="hidden" value="">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Confirm</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade edit-modal-data animated pulse" id="edit-modal-data" tabindex="-1" role="dialog" aria-labelledby="edit-modal-data" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" id="ajax_modal"></div>
+  </div>
+</div>
+<div class="modal fade view-modal-data animated pulse" id="view-modal-data" tabindex="-1" role="dialog" aria-labelledby="view-modal-data" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="ajax_modal_view"></div>
+  </div>
+</div>
+<div class="modal fade payroll_template_modal default-modal animated pulse" id="payroll_template_modal" tabindex="-1" role="dialog" aria-labelledby="detail-modal-data" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="ajax_modal_payroll"></div>
+  </div>
+</div>
+<div class="modal fade hourlywages_template_modal default-modal animated pulse" id="hourlywages_template_modal" tabindex="-1" role="dialog" aria-labelledby="detail-modal-data" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="ajax_modal_hourlywages"></div>
+  </div>
+</div>
+<div class="modal fade detail_modal_data default-modal animated pulse" id="detail_modal_data" tabindex="-1" role="dialog" aria-labelledby="detail-modal-data" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="ajax_modal_details"></div>
+  </div>
+</div>
+<div class="modal fade emo_monthly_pay animated pulse" id="emo_monthly_pay" tabindex="-1" role="dialog" aria-labelledby="emo_monthly_pay" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="emo_monthly_pay_aj"></div>
+  </div>
+</div>
+<div class="modal fade emo_hourly_pay animated pulse" id="emo_hourly_pay" tabindex="-1" role="dialog" aria-labelledby="emo_hourly_pay" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="emo_hourly_pay_aj"></div>
+  </div>
+</div>
+<div class="modal fade delete-modal-file animated pulse" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">×</span> </button>
+        <strong class="modal-title">Are you sure you want to delete this record?</strong> </div>
+      <div class="alert alert-danger alert-dismissible fade in m-b-0" role="alert"> <strong>Record deleted can't be restored!!!</strong> </div>
+      <div class="modal-footer">
+        <form id="delete_record_f" name="delete_record_f" role="form" action="" method="post">
+          <input name="_method" type="hidden" value="DELETE">
+          <input name="_token_del_file" type="hidden" value="">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Confirm</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade add-modal-data animated pulse" id="add-modal-data" tabindex="-1" role="dialog" aria-labelledby="add-modal-data" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="add_ajax_modal"></div>
+  </div>
+</div>
+<div class="modal fade delete-modal-task animated pulse" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">×</span> </button>
+        <strong class="modal-title">Are you sure you want to delete this record?</strong> </div>
+      <div class="alert alert-danger alert-dismissible fade in m-b-0" role="alert"> <strong>Record deleted can't be restored!!!</strong> </div>
+      <div class="modal-footer">
+        <form id="delete_record_t" name="delete_record_t" role="form" action="" method="post">
+          <input name="_method" type="hidden" value="DELETE">
+          <input name="_token_del_file" type="hidden" value="">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Confirm</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cd-panel from-right" id="cd-panel">
+</div> <!-- cd-panel -->
+<style type="text/css">
+.skin-4 .site-header .navbar-brand .logo {
+    background: url(https://hrms.bizz100.com/uploads/logo/logo_1764227667.png) no-repeat;
+}
+.skin-3 .site-header .navbar-brand .logo {
+    background: url(https://hrms.bizz100.com/uploads/logo/logo_1764227667.png) no-repeat;
+}
+.site-header .navbar-brand .logo {
+    background: url(https://hrms.bizz100.com/uploads/logo/logo2_1764227667.png) no-repeat;
+}
+</style>
+
+<!-- Vendor JS -->
+<link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/morris/morris.css">
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/chartjs/Chart.bundle.min.js"></script> 
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/tether/js/tether.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/bootstrap/js/bootstrap.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/detectmobilebrowser/detectmobilebrowser.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/jscrollpane/jquery.mousewheel.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/jscrollpane/mwheelIntent.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/jscrollpane/jquery.jscrollpane.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/waves/waves.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/chartist/chartist.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/switchery/dist/switchery.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/select2/dist/js/select2.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/DataTables/js/jquery.dataTables.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/DataTables/js/dataTables.bootstrap4.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/DataTables/Responsive/js/dataTables.responsive.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/DataTables/Responsive/js/responsive.bootstrap4.min.js"></script>
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/DataTables/Buttons/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/DataTables/Buttons/js/buttons.bootstrap4.min.js"></script>
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/DataTables/pdfmake/build/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/DataTables/pdfmake/build/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/DataTables/Buttons/js/buttons.html5.min.js"></script>
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/DataTables/Buttons/js/buttons.print.min.js"></script>
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/DataTables/Buttons/js/buttons.colVis.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/jquery-fullscreen-plugin/jquery.fullscreen-min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/toastr/toastr.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/raphael/raphael.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/morris/morris.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/summernote/summernote.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/jquery-ui/jquery-ui.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/clockpicker/dist/jquery-clockpicker.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/Trumbowyg/dist/trumbowyg.min.js"></script>
+
+
+<!-- Bootstrap 5 JS (with Popper) -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+
+
+<!--<link rel="stylesheet" href="http://plugins.krajee.com/assets/86220c49/css/fileinput.min.css">-->
+<link rel="stylesheet" href="https://hrms.bizz100.com/skin/vendor/switchery/dist/switchery.min.css">
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/js/app.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/js/demo.js"></script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/vendor/kendo/kendo.all.min.js"></script> 
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://hrms.bizz100.com/skin/js/main.js"></script>
+<link rel="stylesheet" href="https://hrms.bizz100.com/skin/js/style.css">
+<link rel="stylesheet" href="https://hrms.bizz100.com/skin/js/reset.css">
+<script type="text/javascript">
+$(document).ready(function(){
+	toastr.options.closeButton = true;
+	toastr.options.progressBar = true;
+	toastr.options.timeOut = 3000;
+	toastr.options.preventDuplicates = true;
+	toastr.options.positionClass = "toast-top-center";
+	$(".add-new-form").click(function(){
+		$(".add-form").slideToggle('slow');
+	});
+
+	$('.date').datepicker({
+	changeMonth: true,
+	changeYear: true,
+	dateFormat:'yy-mm-dd',
+	yearRange: '1900:' + (new Date().getFullYear() + 15),
+	beforeShow: function(input) {
+		$(input).datepicker("widget").show();
+	}
+	});
+});	
+</script> 
+<style type="text/css">
+
+</style>
+<script type="text/javascript">var user_role = '1';</script>
+<script type="text/javascript">var js_date_format = 'dd-M-yy';</script> 
+<script type="text/javascript">var site_url = 'https://hrms.bizz100.com/';</script> 
+<script type="text/javascript">var base_url = 'https://hrms.bizz100.com/dashboard';</script> 
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/js_module/dashboard.js"></script>
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/js_module/set_clocking.js"></script>
+<script type="text/javascript" src="https://hrms.bizz100.com/skin/js_module/custom.js"></script>
+</body></html>
