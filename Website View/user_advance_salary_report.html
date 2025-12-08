@@ -58,57 +58,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY_HERE",
-            authDomain: "hrms-application-f694a.firebaseapp.com",
-            projectId: "hrms-application-f694a",
-            storageBucket: "hrms-application-f694a.firebasestorage.app",
-            messagingSenderId: "373740729197",
-            appId: "1:373740729197:web:23dd14a4b13288ba8f2064",
-            measurementId: "G-HCXXDNBFLM"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const messaging = firebase.messaging();
-
-        // register service worker (you said SW file is in project root)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/firebase-messaging-sw.js')
-                .then((reg) => {
-                    messaging.useServiceWorker(reg);
-
-                    // request permission and get token
-                    messaging.requestPermission()
-                        .then(() => messaging.getToken())
-                        .then((token) => {
-                            console.log('ADMIN WEB FCM TOKEN:', token);
-
-                            // send token to server (Dashboard controller)
-                            fetch("https://hrms.bizz100.com/dashboard/save_fcm_token", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ token: token })
-                            }).then(r => r.json()).then(d => console.log(d)).catch(e => console.error(e));
-                        })
-                        .catch(err => {
-                            console.warn('FCM permission/token error:', err);
-                        });
-                })
-                .catch(err => console.error('SW register failed', err));
-        }
-
-        // handle messages in foreground
-        messaging.onMessage(function (payload) {
-            console.log('Foreground message:', payload);
-            // show simple toast (you can replace with Swal/Toastr)
-            const t = document.createElement('div');
-            t.style = 'position:fixed;right:20px;top:20px;background:#333;color:#fff;padding:12px;border-radius:6px;z-index:99999';
-            t.innerHTML = `<b>${payload.notification.title}</b><div>${payload.notification.body}</div>`;
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 5000);
-        });
-    </script>
-    <!-- firebase config end -->
 </head>
 
 <body class="large-sidebar  fixed-header fixed-sidebar  static skin-6 ">
