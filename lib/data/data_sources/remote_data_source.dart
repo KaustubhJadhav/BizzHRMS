@@ -2560,4 +2560,90 @@ class RemoteDataSource extends BaseDataSource {
       }
     }
   }
+
+  /// Get Performance List API - requires Bearer token and optional Cookie
+  /// Returns: {status: bool, message: String, total: int, data: [...]}
+  Future<Map<String, dynamic>> getPerformanceList(
+    String token,
+    String? cookie,
+  ) async {
+    try {
+      final headers = <String, dynamic>{
+        'Authorization': 'Bearer $token',
+      };
+
+      // Add Cookie header if provided
+      if (cookie != null && cookie.isNotEmpty) {
+        headers['Cookie'] = cookie;
+      }
+
+      final response = await _dio.post(
+        AppConstants.performanceListEndpoint,
+        options: Options(
+          headers: headers,
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch performance list');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch performance list');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Performance Detail By ID API - requires Bearer token, Cookie, and FormData
+  /// Returns: {status: bool, message: String, data: {...}}
+  Future<Map<String, dynamic>> getPerformanceDetailById(
+    String token,
+    String? cookie,
+    String performanceAppraisalId,
+  ) async {
+    try {
+      final formData = FormData.fromMap({
+        'performance_appraisal_id': performanceAppraisalId,
+      });
+
+      final headers = <String, dynamic>{
+        'Authorization': 'Bearer $token',
+      };
+
+      // Add Cookie header if provided
+      if (cookie != null && cookie.isNotEmpty) {
+        headers['Cookie'] = cookie;
+      }
+
+      final response = await _dio.post(
+        AppConstants.performanceDetailEndpoint,
+        data: formData,
+        options: Options(
+          headers: headers,
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch performance details');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch performance details');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
 }

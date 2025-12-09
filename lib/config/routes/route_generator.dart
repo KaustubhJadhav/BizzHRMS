@@ -25,6 +25,7 @@ import 'package:bizzhrms_flutter_app/presentation/payroll/view/payroll_page.dart
 import 'package:bizzhrms_flutter_app/presentation/training/view/training_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/training/view/training_details_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/performance/view/performance_page.dart';
+import 'package:bizzhrms_flutter_app/presentation/performance/view/performance_details_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/transfers/view/transfers_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/promotions/view/promotions_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/warnings/view/warnings_page.dart';
@@ -226,6 +227,15 @@ class RouteGenerator {
       case AppConstants.routePerformance:
         return SmoothPageRoute(
           builder: (context) => const PerformancePage(),
+          settings: settings,
+        );
+      case AppConstants.routePerformanceDetails:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return SmoothPageRoute(
+          builder: (context) => PerformanceDetailsPage(
+            performanceAppraisalId: args?['performance_appraisal_id']?.toString() ?? '',
+            initialPerformance: args?['performance'] as Map<String, dynamic>?,
+          ),
           settings: settings,
         );
       case AppConstants.routeTransfers:

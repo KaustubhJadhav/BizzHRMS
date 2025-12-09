@@ -62,6 +62,8 @@ class AppConstants {
   static const String advanceSalaryListEndpoint = 'api_payroll/getAdvanceSalaryList';
   static const String addAdvanceSalaryEndpoint = 'api_payroll/addAdvanceSalary';
   static const String advanceSalaryReportListEndpoint = 'api_payroll/getAdvanceSalaryReportList';
+  static const String performanceListEndpoint = 'Api_common/getPerformanceList';
+  static const String performanceDetailEndpoint = 'Api_common/getPerformanceDetailById';
   static const String adminDashboardEndpoint = 'admin/dashboard/';
   static const String adminEmployeesEndpoint = 'admin/employees';
   static const String adminAttendanceFilteredEndpoint =
@@ -115,6 +117,7 @@ class AppConstants {
   static const String routeTraining = '/training';
   static const String routeTrainingDetails = '/training-details';
   static const String routePerformance = '/performance';
+  static const String routePerformanceDetails = '/performance-details';
   static const String routeTransfers = '/transfers';
   static const String routePromotions = '/promotions';
   static const String routeWarnings = '/warnings';

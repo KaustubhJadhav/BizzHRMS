@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'package:bizzhrms_flutter_app/core/utils/preferences_helper.dart';
+import 'package:bizzhrms_flutter_app/data/data_sources/remote_data_source.dart';
 
 enum PerformanceStatus { initial, loading, success, error }
 
 class PerformanceViewModel extends ChangeNotifier {
   PerformanceStatus _status = PerformanceStatus.initial;
   String? _errorMessage;
+  final RemoteDataSource _remoteDataSource = RemoteDataSource();
 
   PerformanceStatus get status => _status;
   String? get errorMessage => _errorMessage;
@@ -15,82 +18,58 @@ class PerformanceViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> get performanceList => _performanceList;
   int get total => _total;
 
-  Future<void> loadPerformanceData() async {
+  Future<void> loadPerformanceData({
+    String? cookie,
+  }) async {
     _status = PerformanceStatus.loading;
     _errorMessage = null;
     notifyListeners();
 
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 500));
-
     try {
-      // Dummy data matching the HTML table structure
-      _performanceList = [
-        {
-          'employee': 'John Doe',
-          'department': 'Engineering',
-          'designation': 'Senior Developer',
-          'appraisal_date': '2024-12-01',
-        },
-        {
-          'employee': 'Jane Smith',
-          'department': 'Sales',
-          'designation': 'Sales Manager',
-          'appraisal_date': '2024-11-28',
-        },
-        {
-          'employee': 'Mike Johnson',
-          'department': 'Marketing',
-          'designation': 'Marketing Executive',
-          'appraisal_date': '2024-11-25',
-        },
-        {
-          'employee': 'Sarah Williams',
-          'department': 'HR',
-          'designation': 'HR Manager',
-          'appraisal_date': '2024-11-20',
-        },
-        {
-          'employee': 'David Brown',
-          'department': 'Finance',
-          'designation': 'Finance Analyst',
-          'appraisal_date': '2024-11-18',
-        },
-        {
-          'employee': 'Emily Davis',
-          'department': 'Engineering',
-          'designation': 'Junior Developer',
-          'appraisal_date': '2024-11-15',
-        },
-        {
-          'employee': 'Robert Wilson',
-          'department': 'Operations',
-          'designation': 'Operations Manager',
-          'appraisal_date': '2024-11-12',
-        },
-        {
-          'employee': 'Lisa Anderson',
-          'department': 'Sales',
-          'designation': 'Sales Executive',
-          'appraisal_date': '2024-11-10',
-        },
-        {
-          'employee': 'James Taylor',
-          'department': 'Engineering',
-          'designation': 'Tech Lead',
-          'appraisal_date': '2024-11-08',
-        },
-        {
-          'employee': 'Maria Garcia',
-          'department': 'Marketing',
-          'designation': 'Marketing Manager',
-          'appraisal_date': '2024-11-05',
-        },
-      ];
+      // Get token from preferences
+      final token = PreferencesHelper.getUserToken();
+      if (token == null || token.isEmpty) {
+        _status = PerformanceStatus.error;
+        _errorMessage = 'User not authenticated';
+        notifyListeners();
+        return;
+      }
 
-      _total = _performanceList.length;
-      _status = PerformanceStatus.success;
-      notifyListeners();
+      // Call API
+      final response = await _remoteDataSource.getPerformanceList(
+        token,
+        cookie,
+      );
+
+      if (response['status'] == true) {
+        _total = response['total'] ?? 0;
+        final data = response['data'] as List<dynamic>?;
+        
+        if (data != null) {
+          _performanceList = data.map((item) {
+            final performance = item as Map<String, dynamic>;
+            // Map API fields to UI-friendly format
+            return {
+              'performance_appraisal_id': performance['performance_appraisal_id']?.toString() ?? '',
+              'employee_primary_id': performance['employee_primary_id']?.toString() ?? '',
+              'employee_id': performance['employee_id']?.toString() ?? '',
+              'employee_name': performance['employee_name']?.toString() ?? '',
+              'department': performance['department']?.toString() ?? '',
+              'designation': performance['designation']?.toString() ?? '',
+              'appraisal_date': performance['appraisal_date']?.toString() ?? '',
+            };
+          }).toList();
+        } else {
+          _performanceList = [];
+        }
+        
+        _status = PerformanceStatus.success;
+        notifyListeners();
+      } else {
+        _status = PerformanceStatus.error;
+        _errorMessage = response['message']?.toString() ?? 'Failed to load performance list';
+        notifyListeners();
+      }
     } catch (e) {
       _status = PerformanceStatus.error;
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
@@ -98,8 +77,36 @@ class PerformanceViewModel extends ChangeNotifier {
     }
   }
 
-  void refresh() {
-    loadPerformanceData();
+  void refresh({
+    String? cookie,
+  }) {
+    loadPerformanceData(cookie: cookie);
+  }
+
+  /// Get Performance Details By ID
+  Future<Map<String, dynamic>?> getPerformanceDetails(String performanceAppraisalId, {String? cookie}) async {
+    try {
+      // Get token from preferences
+      final token = PreferencesHelper.getUserToken();
+      if (token == null || token.isEmpty) {
+        throw Exception('User not authenticated');
+      }
+
+      // Call API
+      final response = await _remoteDataSource.getPerformanceDetailById(
+        token,
+        cookie,
+        performanceAppraisalId,
+      );
+
+      if (response['status'] == true && response['data'] != null) {
+        return response['data'] as Map<String, dynamic>;
+      } else {
+        throw Exception(response['message']?.toString() ?? 'Failed to load performance details');
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 }
 

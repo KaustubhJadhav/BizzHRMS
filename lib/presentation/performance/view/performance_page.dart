@@ -34,13 +34,15 @@ class _PerformancePageState extends State<PerformancePage> {
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       performance = performance.where((item) {
-        final employee = item['employee']?.toString().toLowerCase() ?? '';
+        final employeeName = item['employee_name']?.toString().toLowerCase() ?? '';
         final department = item['department']?.toString().toLowerCase() ?? '';
         final designation = item['designation']?.toString().toLowerCase() ?? '';
+        final employeeId = item['employee_id']?.toString().toLowerCase() ?? '';
         final query = _searchQuery.toLowerCase();
-        return employee.contains(query) ||
+        return employeeName.contains(query) ||
             department.contains(query) ||
-            designation.contains(query);
+            designation.contains(query) ||
+            employeeId.contains(query);
       }).toList();
     }
 
@@ -62,6 +64,27 @@ class _PerformancePageState extends State<PerformancePage> {
   }
 
   void _showPerformanceDetails(BuildContext context, Map<String, dynamic> performance) {
+    // Try to get performance_appraisal_id from the performance object
+    final performanceAppraisalId = performance['performance_appraisal_id']?.toString() ?? '';
+    
+    if (performanceAppraisalId.isEmpty) {
+      // If no performance_appraisal_id, show basic details in dialog
+      _showPerformanceDetailsDialog(context, performance);
+      return;
+    }
+
+    // Navigate to performance details page
+    Navigator.pushNamed(
+      context,
+      AppConstants.routePerformanceDetails,
+      arguments: {
+        'performance_appraisal_id': performanceAppraisalId,
+        'performance': performance,
+      },
+    );
+  }
+
+  void _showPerformanceDetailsDialog(BuildContext context, Map<String, dynamic> performance) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -86,11 +109,14 @@ class _PerformancePageState extends State<PerformancePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'View Performance Appraisal Details',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        'View Performance Appraisal Details',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     IconButton(
@@ -110,8 +136,12 @@ class _PerformancePageState extends State<PerformancePage> {
                     child: Column(
                       children: [
                         _buildDetailRow(
-                          'Employee',
-                          performance['employee']?.toString() ?? 'N/A',
+                          'Employee ID',
+                          performance['employee_id']?.toString() ?? 'N/A',
+                        ),
+                        _buildDetailRow(
+                          'Employee Name',
+                          performance['employee_name']?.toString() ?? 'N/A',
                         ),
                         _buildDetailRow(
                           'Department',
@@ -477,7 +507,7 @@ class _PerformancePageState extends State<PerformancePage> {
                                               // Employee
                                               DataCell(
                                                 Text(
-                                                  performance['employee']
+                                                  performance['employee_name']
                                                           ?.toString() ??
                                                       'N/A',
                                                   style: const TextStyle(
