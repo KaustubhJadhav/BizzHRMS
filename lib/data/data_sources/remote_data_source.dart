@@ -2280,4 +2280,284 @@ class RemoteDataSource extends BaseDataSource {
       }
     }
   }
+
+  /// Get Payslip List API - requires Bearer token, Cookie, and FormData
+  /// Returns: {status: bool, message: String, total: int, data: [...]}
+  Future<Map<String, dynamic>> getPayslipList(
+    String token,
+    String? cookie,
+    String monthYear,
+    String amount,
+    String reason,
+    String oneTimeDeduct,
+    String monthlyInstallment,
+  ) async {
+    try {
+      final formData = FormData.fromMap({
+        'month_year': monthYear,
+        'amount': amount,
+        'reason': reason,
+        'one_time_deduct': oneTimeDeduct,
+        'monthly_installment': monthlyInstallment,
+      });
+
+      final headers = <String, dynamic>{
+        'Authorization': 'Bearer $token',
+      };
+
+      // Add Cookie header if provided
+      if (cookie != null && cookie.isNotEmpty) {
+        headers['Cookie'] = cookie;
+      }
+
+      final response = await _dio.post(
+        AppConstants.payslipListEndpoint,
+        data: formData,
+        options: Options(
+          headers: headers,
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch payslip list');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch payslip list');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Generate Payslip API - requires Bearer token, Cookie, payment_id in FormData
+  /// Returns: {status: bool, message: String, data: {employee: {...}, payslip: {...}, payslip_download_link: String}}
+  Future<Map<String, dynamic>> generatePayslip(
+    String token,
+    String? cookie,
+    String paymentId,
+  ) async {
+    try {
+      final formData = FormData.fromMap({
+        'payment_id': paymentId,
+      });
+
+      final headers = <String, dynamic>{
+        'Authorization': 'Bearer $token',
+      };
+
+      // Add Cookie header if provided
+      if (cookie != null && cookie.isNotEmpty) {
+        headers['Cookie'] = cookie;
+      }
+
+      final response = await _dio.post(
+        AppConstants.generatePayslipEndpoint,
+        data: formData,
+        options: Options(
+          headers: headers,
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to generate payslip');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to generate payslip');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Payslip Details API - requires Bearer token, Cookie, and pay_id in FormData
+  /// Returns: {status: bool, message: String, data: {employee: {...}, salary: {...}, allowances: {...}, deductions: {...}, total_salary_details: {...}}}
+  Future<Map<String, dynamic>> getPayslipDetails(
+    String token,
+    String? cookie,
+    String payId,
+  ) async {
+    try {
+      final formData = FormData.fromMap({
+        'pay_id': payId,
+      });
+
+      final headers = <String, dynamic>{
+        'Authorization': 'Bearer $token',
+      };
+
+      // Add Cookie header if provided
+      if (cookie != null && cookie.isNotEmpty) {
+        headers['Cookie'] = cookie;
+      }
+
+      final response = await _dio.post(
+        AppConstants.payslipDetailEndpoint,
+        data: formData,
+        options: Options(
+          headers: headers,
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch payslip details');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch payslip details');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Advance Salary List API - requires Bearer token and optional Cookie
+  /// Returns: {status: bool, message: String, total: int, data: [...]}
+  Future<Map<String, dynamic>> getAdvanceSalaryList(
+    String token,
+    String? cookie,
+  ) async {
+    try {
+      final headers = <String, dynamic>{
+        'Authorization': 'Bearer $token',
+      };
+
+      // Add Cookie header if provided
+      if (cookie != null && cookie.isNotEmpty) {
+        headers['Cookie'] = cookie;
+      }
+
+      final response = await _dio.post(
+        AppConstants.advanceSalaryListEndpoint,
+        options: Options(
+          headers: headers,
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch advance salary list');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch advance salary list');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Add Advance Salary API - requires Bearer token, Cookie, and FormData
+  /// Returns: {status: bool, message: String}
+  Future<Map<String, dynamic>> addAdvanceSalary(
+    String token,
+    String? cookie,
+    String monthYear,
+    String amount,
+    String reason,
+    String oneTimeDeduct,
+    String monthlyInstallment,
+  ) async {
+    try {
+      final formData = FormData.fromMap({
+        'month_year': monthYear,
+        'amount': amount,
+        'reason': reason,
+        'one_time_deduct': oneTimeDeduct,
+        'monthly_installment': monthlyInstallment,
+      });
+
+      final headers = <String, dynamic>{
+        'Authorization': 'Bearer $token',
+      };
+
+      // Add Cookie header if provided
+      if (cookie != null && cookie.isNotEmpty) {
+        headers['Cookie'] = cookie;
+      }
+
+      final response = await _dio.post(
+        AppConstants.addAdvanceSalaryEndpoint,
+        data: formData,
+        options: Options(
+          headers: headers,
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to add advance salary');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to add advance salary');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Advance Salary Report List API - requires Bearer token and optional Cookie
+  /// Returns: {status: bool, message: String, total: int, data: [...]}
+  Future<Map<String, dynamic>> getAdvanceSalaryReportList(
+    String token,
+    String? cookie,
+  ) async {
+    try {
+      final headers = <String, dynamic>{
+        'Authorization': 'Bearer $token',
+      };
+
+      // Add Cookie header if provided
+      if (cookie != null && cookie.isNotEmpty) {
+        headers['Cookie'] = cookie;
+      }
+
+      final response = await _dio.post(
+        AppConstants.advanceSalaryReportListEndpoint,
+        options: Options(
+          headers: headers,
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch advance salary report list');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch advance salary report list');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
 }

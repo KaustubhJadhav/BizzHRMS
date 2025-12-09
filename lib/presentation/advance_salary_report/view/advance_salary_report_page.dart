@@ -36,10 +36,13 @@ class _AdvanceSalaryReportPageState extends State<AdvanceSalaryReportPage> {
 
     if (_searchQuery.isNotEmpty) {
       reports = reports.where((report) {
-        final employee = report['employee']?.toString().toLowerCase() ?? '';
+        final employeeName = report['employee_name']?.toString().toLowerCase() ?? '';
         final status = report['status']?.toString().toLowerCase() ?? '';
+        final monthYear = report['month_year']?.toString().toLowerCase() ?? '';
         final query = _searchQuery.toLowerCase();
-        return employee.contains(query) || status.contains(query);
+        return employeeName.contains(query) || 
+            status.contains(query) ||
+            monthYear.contains(query);
       }).toList();
     }
 
@@ -111,31 +114,105 @@ class _AdvanceSalaryReportPageState extends State<AdvanceSalaryReportPage> {
                     child: Column(
                       children: [
                         _buildDetailRow(
-                          'Employee',
-                          report['employee']?.toString() ?? 'N/A',
+                          'Employee ID',
+                          report['employee_id']?.toString() ?? 'N/A',
                         ),
                         _buildDetailRow(
-                          'Total Amount',
-                          report['total_amount'] != null
-                              ? '₹ ${report['total_amount'].toStringAsFixed(2)}'
+                          'Employee Name',
+                          report['employee_name']?.toString() ?? 'N/A',
+                        ),
+                        _buildDetailRow(
+                          'Month & Year',
+                          report['month_year']?.toString() ?? 'N/A',
+                        ),
+                        _buildDetailRow(
+                          'Advance Amount',
+                          report['advance_amount'] != null && report['advance_amount'].toString().isNotEmpty
+                              ? '₹ ${report['advance_amount']}'
                               : 'N/A',
                         ),
                         _buildDetailRow(
-                          'Total Paid Amount',
-                          report['total_paid_amount'] != null
-                              ? '₹ ${report['total_paid_amount'].toStringAsFixed(2)}'
-                              : 'N/A',
+                          'Total Paid',
+                          report['total_paid'] != null && report['total_paid'].toString().isNotEmpty
+                              ? '₹ ${report['total_paid']}'
+                              : '₹ 0',
                         ),
                         _buildDetailRow(
                           'Remaining Amount',
-                          report['remaining_amount'] != null
-                              ? '₹ ${report['remaining_amount'].toStringAsFixed(2)}'
+                          report['remaining_amount'] != null && report['remaining_amount'].toString().isNotEmpty
+                              ? '₹ ${report['remaining_amount']}'
                               : 'N/A',
+                        ),
+                        _buildDetailRow(
+                          'Monthly Installment',
+                          report['monthly_installment'] != null && report['monthly_installment'].toString().isNotEmpty
+                              ? report['monthly_installment'] == '0'
+                                  ? 'N/A'
+                                  : '₹ ${report['monthly_installment']}'
+                              : 'N/A',
+                        ),
+                        _buildDetailRow(
+                          'One Time Deduct',
+                          report['one_time_deduct']?.toString() ?? 'N/A',
                         ),
                         _buildDetailRow(
                           'Status',
                           report['status']?.toString() ?? 'N/A',
                         ),
+                        // Requested Dates Section
+                        if (report['requested_dates'] != null && (report['requested_dates'] as List).isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Requested Dates',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF2C3E50),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ...((report['requested_dates'] as List).map((dateItem) {
+                                  final date = dateItem as Map<String, dynamic>;
+                                  return Card(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    elevation: 1,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildDetailRow(
+                                            'Advance Amount',
+                                            date['advance_amount']?.toString() ?? 'N/A',
+                                          ),
+                                          _buildDetailRow(
+                                            'Month & Year',
+                                            date['month_year']?.toString() ?? 'N/A',
+                                          ),
+                                          _buildDetailRow(
+                                            'One Time Deduct',
+                                            date['one_time_deduct']?.toString() ?? 'N/A',
+                                          ),
+                                          _buildDetailRow(
+                                            'Deducted Amount',
+                                            date['deducted_amount']?.toString() ?? 'N/A',
+                                          ),
+                                          _buildDetailRow(
+                                            'Deduction Date',
+                                            date['deduction_date']?.toString() ?? 'N/A',
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }).toList()),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -218,11 +295,14 @@ class _AdvanceSalaryReportPageState extends State<AdvanceSalaryReportPage> {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'fully paid':
+      case 'paid':
         return Colors.green;
       case 'partially paid':
         return Colors.orange;
       case 'pending':
         return Colors.blue;
+      case 'remaining':
+        return Colors.red;
       default:
         return Colors.grey;
     }
@@ -437,7 +517,7 @@ class _AdvanceSalaryReportPageState extends State<AdvanceSalaryReportPage> {
                                           DataColumn(
                                             label: Row(
                                               children: [
-                                                Text('Employee'),
+                                                Text('Employee Name'),
                                                 SizedBox(width: 4),
                                                 Icon(Icons.swap_vert, size: 16),
                                               ],
@@ -446,7 +526,7 @@ class _AdvanceSalaryReportPageState extends State<AdvanceSalaryReportPage> {
                                           DataColumn(
                                             label: Row(
                                               children: [
-                                                Text('Total Amount'),
+                                                Text('Month & Year'),
                                                 SizedBox(width: 4),
                                                 Icon(Icons.swap_vert, size: 16),
                                               ],
@@ -455,7 +535,16 @@ class _AdvanceSalaryReportPageState extends State<AdvanceSalaryReportPage> {
                                           DataColumn(
                                             label: Row(
                                               children: [
-                                                Text('Total Paid Amount'),
+                                                Text('Advance Amount'),
+                                                SizedBox(width: 4),
+                                                Icon(Icons.swap_vert, size: 16),
+                                              ],
+                                            ),
+                                          ),
+                                          DataColumn(
+                                            label: Row(
+                                              children: [
+                                                Text('Total Paid'),
                                                 SizedBox(width: 4),
                                                 Icon(Icons.swap_vert, size: 16),
                                               ],
@@ -503,7 +592,7 @@ class _AdvanceSalaryReportPageState extends State<AdvanceSalaryReportPage> {
                                               ),
                                               DataCell(
                                                 Text(
-                                                  report['employee']
+                                                  report['employee_name']
                                                           ?.toString() ??
                                                       'N/A',
                                                   style: const TextStyle(
@@ -514,8 +603,17 @@ class _AdvanceSalaryReportPageState extends State<AdvanceSalaryReportPage> {
                                               ),
                                               DataCell(
                                                 Text(
-                                                  report['total_amount'] != null
-                                                      ? '₹ ${report['total_amount'].toStringAsFixed(2)}'
+                                                  report['month_year']
+                                                          ?.toString() ??
+                                                      'N/A',
+                                                  style: const TextStyle(
+                                                      fontSize: 14),
+                                                ),
+                                              ),
+                                              DataCell(
+                                                Text(
+                                                  report['advance_amount'] != null && report['advance_amount'].toString().isNotEmpty
+                                                      ? '₹ ${report['advance_amount']}'
                                                       : 'N/A',
                                                   style: const TextStyle(
                                                       fontSize: 14),
@@ -523,19 +621,17 @@ class _AdvanceSalaryReportPageState extends State<AdvanceSalaryReportPage> {
                                               ),
                                               DataCell(
                                                 Text(
-                                                  report['total_paid_amount'] !=
-                                                          null
-                                                      ? '₹ ${report['total_paid_amount'].toStringAsFixed(2)}'
-                                                      : 'N/A',
+                                                  report['total_paid'] != null && report['total_paid'].toString().isNotEmpty
+                                                      ? '₹ ${report['total_paid']}'
+                                                      : '₹ 0',
                                                   style: const TextStyle(
                                                       fontSize: 14),
                                                 ),
                                               ),
                                               DataCell(
                                                 Text(
-                                                  report['remaining_amount'] !=
-                                                          null
-                                                      ? '₹ ${report['remaining_amount'].toStringAsFixed(2)}'
+                                                  report['remaining_amount'] != null && report['remaining_amount'].toString().isNotEmpty
+                                                      ? '₹ ${report['remaining_amount']}'
                                                       : 'N/A',
                                                   style: const TextStyle(
                                                       fontSize: 14),

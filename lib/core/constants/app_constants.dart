@@ -56,6 +56,12 @@ class AppConstants {
   static const String deleteTicketAttachmentEndpoint =
       'api_ticket/delete_ticket_attachment';
   static const String saveFCMTokenEndpoint = 'attendance/save_fcm_token';
+  static const String payslipListEndpoint = 'api_payroll/getPayslipList';
+  static const String payslipDetailEndpoint = 'api_payroll/getPayslipDetails';
+  static const String generatePayslipEndpoint = 'api_payroll/generatePayslip';
+  static const String advanceSalaryListEndpoint = 'api_payroll/getAdvanceSalaryList';
+  static const String addAdvanceSalaryEndpoint = 'api_payroll/addAdvanceSalary';
+  static const String advanceSalaryReportListEndpoint = 'api_payroll/getAdvanceSalaryReportList';
   static const String adminDashboardEndpoint = 'admin/dashboard/';
   static const String adminEmployeesEndpoint = 'admin/employees';
   static const String adminAttendanceFilteredEndpoint =
@@ -102,6 +108,8 @@ class AppConstants {
   static const String routeTicketDetails = '/ticket-details';
   static const String routePayroll = '/payroll';
   static const String routePayslips = '/payslips';
+  static const String routePayslipDetails = '/payslip-details';
+  static const String routeGeneratePayslips = '/generate-payslips';
   static const String routeAdvanceSalary = '/advance-salary';
   static const String routeAdvanceSalaryReport = '/advance-salary-report';
   static const String routeTraining = '/training';

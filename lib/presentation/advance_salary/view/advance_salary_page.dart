@@ -44,13 +44,15 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
 
     if (_searchQuery.isNotEmpty) {
       advanceSalaries = advanceSalaries.where((item) {
-        final employee = item['employee']?.toString().toLowerCase() ?? '';
+        final employeeName = item['employee_name']?.toString().toLowerCase() ?? '';
         final monthYear = item['month_year']?.toString().toLowerCase() ?? '';
         final status = item['status']?.toString().toLowerCase() ?? '';
+        final reason = item['reason']?.toString().toLowerCase() ?? '';
         final query = _searchQuery.toLowerCase();
-        return employee.contains(query) ||
+        return employeeName.contains(query) ||
             monthYear.contains(query) ||
-            status.contains(query);
+            status.contains(query) ||
+            reason.contains(query);
       }).toList();
     }
 
@@ -95,11 +97,14 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'View Advance Salary Details',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        'View Advance Salary Details',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     IconButton(
@@ -119,12 +124,17 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
                       children: [
                         _buildDetailRow(
                           'Employee',
-                          advanceSalary['employee']?.toString() ?? 'N/A',
+                          advanceSalary['employee_name']?.toString() ?? 'N/A',
                         ),
+                        if (advanceSalary['reason'] != null && advanceSalary['reason'].toString().isNotEmpty)
+                          _buildDetailRow(
+                            'Reason',
+                            advanceSalary['reason'].toString(),
+                          ),
                         _buildDetailRow(
                           'Amount',
-                          advanceSalary['amount'] != null
-                              ? '₹ ${advanceSalary['amount'].toStringAsFixed(2)}'
+                          advanceSalary['advance_amount'] != null && advanceSalary['advance_amount'].toString().isNotEmpty
+                              ? '₹ ${advanceSalary['advance_amount']}'
                               : 'N/A',
                         ),
                         _buildDetailRow(
@@ -136,9 +146,11 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
                           advanceSalary['one_time_deduct']?.toString() ?? 'N/A',
                         ),
                         _buildDetailRow(
-                          'EMI',
-                          advanceSalary['emi'] != null
-                              ? '₹ ${advanceSalary['emi'].toStringAsFixed(2)}'
+                          'Monthly Installment',
+                          advanceSalary['monthly_installment'] != null && advanceSalary['monthly_installment'].toString().isNotEmpty
+                              ? advanceSalary['monthly_installment'] == '0'
+                                  ? 'N/A'
+                                  : '₹ ${advanceSalary['monthly_installment']}'
                               : 'N/A',
                         ),
                         _buildDetailRow(
@@ -228,26 +240,82 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
     );
   }
 
-  void _handleAddAdvanceSalary() {
+  Future<void> _handleAddAdvanceSalary(AdvanceSalaryViewModel viewModel) async {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Advance salary request created successfully!'),
-          backgroundColor: Colors.green,
+      // Show loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
         ),
       );
-      setState(() {
-        _showAddForm = false;
-        _monthYearController.clear();
-        _amountController.clear();
-        _emiController.clear();
-        _reasonController.clear();
-        _selectedOneTimeDeduct = null;
-      });
+
+      try {
+        // Convert one_time_deduct to '0' or '1' based on selection
+        final oneTimeDeduct = _selectedOneTimeDeduct == 'Yes' ? '1' : '0';
+        
+        // Get monthly installment, default to '0' if one-time deduct is Yes
+        final monthlyInstallment = _selectedOneTimeDeduct == 'Yes' 
+            ? '0' 
+            : (_emiController.text.trim().isEmpty ? '0' : _emiController.text.trim());
+
+        final success = await viewModel.addAdvanceSalary(
+          monthYear: _monthYearController.text.trim(),
+          amount: _amountController.text.trim(),
+          reason: _reasonController.text.trim(),
+          oneTimeDeduct: oneTimeDeduct,
+          monthlyInstallment: monthlyInstallment,
+        );
+
+        // Close loading dialog
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+
+        if (success) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Advance salary request created successfully!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+          setState(() {
+            _showAddForm = false;
+            _monthYearController.clear();
+            _amountController.clear();
+            _emiController.clear();
+            _reasonController.clear();
+            _selectedOneTimeDeduct = null;
+          });
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(viewModel.errorMessage ?? 'Failed to create advance salary request'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        // Close loading dialog
+        if (mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 
-  Widget _buildAddAdvanceSalaryForm() {
+  Widget _buildAddAdvanceSalaryForm(AdvanceSalaryViewModel viewModel) {
     if (!_showAddForm) return const SizedBox.shrink();
 
     return Card(
@@ -318,7 +386,7 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
                             if (picked != null) {
                               setState(() {
                                 _monthYearController.text =
-                                    '${picked.month.toString().padLeft(2, '0')}-${picked.year}';
+                                    '${picked.year}-${picked.month.toString().padLeft(2, '0')}';
                               });
                             }
                           },
@@ -543,17 +611,21 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
                 },
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _handleAddAdvanceSalary,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2C3E50),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
-                child: const Text('Save'),
+              Consumer<AdvanceSalaryViewModel>(
+                builder: (context, viewModel, child) {
+                  return ElevatedButton(
+                    onPressed: () => _handleAddAdvanceSalary(viewModel),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2C3E50),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: const Text('Save'),
+                  );
+                },
               ),
             ],
           ),
@@ -565,6 +637,7 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'approved':
+      case 'accepted':
         return Colors.green;
       case 'pending':
         return Colors.orange;
@@ -614,7 +687,7 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildAddAdvanceSalaryForm(),
+                              _buildAddAdvanceSalaryForm(viewModel),
                               Card(
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
@@ -913,7 +986,7 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
                                               DataColumn(
                                                 label: Row(
                                                   children: [
-                                                    Text('EMI'),
+                                                    Text('Monthly Installment'),
                                                     SizedBox(width: 4),
                                                     Icon(Icons.swap_vert,
                                                         size: 16),
@@ -964,7 +1037,7 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
                                                   ),
                                                   DataCell(
                                                     Text(
-                                                      item['employee']
+                                                      item['employee_name']
                                                               ?.toString() ??
                                                           'N/A',
                                                       style: const TextStyle(
@@ -973,8 +1046,8 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
                                                   ),
                                                   DataCell(
                                                     Text(
-                                                      item['amount'] != null
-                                                          ? '₹ ${item['amount'].toStringAsFixed(2)}'
+                                                      item['advance_amount'] != null && item['advance_amount'].toString().isNotEmpty
+                                                          ? '₹ ${item['advance_amount']}'
                                                           : 'N/A',
                                                       style: const TextStyle(
                                                           fontSize: 14),
@@ -1000,8 +1073,10 @@ class _AdvanceSalaryPageState extends State<AdvanceSalaryPage> {
                                                   ),
                                                   DataCell(
                                                     Text(
-                                                      item['emi'] != null
-                                                          ? '₹ ${item['emi'].toStringAsFixed(2)}'
+                                                      item['monthly_installment'] != null && item['monthly_installment'].toString().isNotEmpty
+                                                          ? item['monthly_installment'] == '0'
+                                                              ? 'N/A'
+                                                              : '₹ ${item['monthly_installment']}'
                                                           : 'N/A',
                                                       style: const TextStyle(
                                                           fontSize: 14),

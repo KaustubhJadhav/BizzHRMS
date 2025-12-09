@@ -35,6 +35,8 @@ import 'package:bizzhrms_flutter_app/presentation/office_shift/view/office_shift
 import 'package:bizzhrms_flutter_app/presentation/job_applied/view/job_applied_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/job_interview/view/job_interview_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/payslips/view/payslips_page.dart';
+import 'package:bizzhrms_flutter_app/presentation/payslips/view/payslip_details_page.dart';
+import 'package:bizzhrms_flutter_app/presentation/payslips/view/generate_payslips_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/advance_salary/view/advance_salary_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/advance_salary_report/view/advance_salary_report_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/shared/pages/placeholder_page.dart';
@@ -179,6 +181,22 @@ class RouteGenerator {
       case AppConstants.routePayslips:
         return SmoothPageRoute(
           builder: (context) => const PayslipsPage(),
+          settings: settings,
+        );
+      case AppConstants.routePayslipDetails:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return SmoothPageRoute(
+          builder: (context) => PayslipDetailsPage(
+            payId: args?['pay_id']?.toString() ?? '',
+          ),
+          settings: settings,
+        );
+      case AppConstants.routeGeneratePayslips:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return SmoothPageRoute(
+          builder: (context) => GeneratePayslipsPage(
+            paymentId: args?['payment_id']?.toString(),
+          ),
           settings: settings,
         );
       case AppConstants.routeAdvanceSalary:

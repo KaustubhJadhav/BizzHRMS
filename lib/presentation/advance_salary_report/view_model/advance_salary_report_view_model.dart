@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'package:bizzhrms_flutter_app/core/utils/preferences_helper.dart';
+import 'package:bizzhrms_flutter_app/data/data_sources/remote_data_source.dart';
 
 enum AdvanceSalaryReportStatus { initial, loading, success, error }
 
 class AdvanceSalaryReportViewModel extends ChangeNotifier {
   AdvanceSalaryReportStatus _status = AdvanceSalaryReportStatus.initial;
   String? _errorMessage;
+  final RemoteDataSource _remoteDataSource = RemoteDataSource();
 
   AdvanceSalaryReportStatus get status => _status;
   String? get errorMessage => _errorMessage;
@@ -15,100 +18,61 @@ class AdvanceSalaryReportViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> get advanceSalaryReportList => _advanceSalaryReportList;
   int get total => _total;
 
-  Future<void> loadAdvanceSalaryReportData() async {
+  Future<void> loadAdvanceSalaryReportData({
+    String? cookie,
+  }) async {
     _status = AdvanceSalaryReportStatus.loading;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Get token from preferences
+      final token = PreferencesHelper.getUserToken();
+      if (token == null || token.isEmpty) {
+        _status = AdvanceSalaryReportStatus.error;
+        _errorMessage = 'User not authenticated';
+        notifyListeners();
+        return;
+      }
 
-      _advanceSalaryReportList = [
-        {
-          'id': 1,
-          'employee': 'John Doe',
-          'total_amount': 75000.00,
-          'total_paid_amount': 50000.00,
-          'remaining_amount': 25000.00,
-          'status': 'Partially Paid', // Fully Paid, Partially Paid, Pending
-        },
-        {
-          'id': 2,
-          'employee': 'Jane Smith',
-          'total_amount': 90000.00,
-          'total_paid_amount': 30000.00,
-          'remaining_amount': 60000.00,
-          'status': 'Partially Paid',
-        },
-        {
-          'id': 3,
-          'employee': 'Alice Brown',
-          'total_amount': 60000.00,
-          'total_paid_amount': 60000.00,
-          'remaining_amount': 0.00,
-          'status': 'Fully Paid',
-        },
-        {
-          'id': 4,
-          'employee': 'Bob Johnson',
-          'total_amount': 105000.00,
-          'total_paid_amount': 0.00,
-          'remaining_amount': 105000.00,
-          'status': 'Pending',
-        },
-        {
-          'id': 5,
-          'employee': 'Charlie Green',
-          'total_amount': 45000.00,
-          'total_paid_amount': 45000.00,
-          'remaining_amount': 0.00,
-          'status': 'Fully Paid',
-        },
-        {
-          'id': 6,
-          'employee': 'Diana Prince',
-          'total_amount': 120000.00,
-          'total_paid_amount': 40000.00,
-          'remaining_amount': 80000.00,
-          'status': 'Partially Paid',
-        },
-        {
-          'id': 7,
-          'employee': 'Eve Adams',
-          'total_amount': 54000.00,
-          'total_paid_amount': 54000.00,
-          'remaining_amount': 0.00,
-          'status': 'Fully Paid',
-        },
-        {
-          'id': 8,
-          'employee': 'Frank White',
-          'total_amount': 84000.00,
-          'total_paid_amount': 28000.00,
-          'remaining_amount': 56000.00,
-          'status': 'Partially Paid',
-        },
-        {
-          'id': 9,
-          'employee': 'Grace Lee',
-          'total_amount': 66000.00,
-          'total_paid_amount': 66000.00,
-          'remaining_amount': 0.00,
-          'status': 'Fully Paid',
-        },
-        {
-          'id': 10,
-          'employee': 'Harry Green',
-          'total_amount': 96000.00,
-          'total_paid_amount': 0.00,
-          'remaining_amount': 96000.00,
-          'status': 'Pending',
-        },
-      ];
+      // Call API
+      final response = await _remoteDataSource.getAdvanceSalaryReportList(
+        token,
+        cookie,
+      );
 
-      _total = _advanceSalaryReportList.length;
-      _status = AdvanceSalaryReportStatus.success;
-      notifyListeners();
+      if (response['status'] == true) {
+        _total = response['total'] ?? 0;
+        final data = response['data'] as List<dynamic>?;
+        
+        if (data != null) {
+          _advanceSalaryReportList = data.map((item) {
+            final report = item as Map<String, dynamic>;
+            // Map API fields to UI-friendly format, preserving requested_dates array
+            return {
+              'employee_id': report['employee_id']?.toString() ?? '',
+              'employee_name': report['employee_name']?.toString() ?? '',
+              'month_year': report['month_year']?.toString() ?? '',
+              'advance_amount': report['advance_amount']?.toString() ?? '',
+              'total_paid': report['total_paid']?.toString() ?? '',
+              'remaining_amount': report['remaining_amount']?.toString() ?? '',
+              'monthly_installment': report['monthly_installment']?.toString() ?? '',
+              'one_time_deduct': report['one_time_deduct']?.toString() ?? '',
+              'status': report['status']?.toString() ?? '',
+              'requested_dates': report['requested_dates'] as List<dynamic>? ?? [],
+            };
+          }).toList();
+        } else {
+          _advanceSalaryReportList = [];
+        }
+        
+        _status = AdvanceSalaryReportStatus.success;
+        notifyListeners();
+      } else {
+        _status = AdvanceSalaryReportStatus.error;
+        _errorMessage = response['message']?.toString() ?? 'Failed to load advance salary report list';
+        notifyListeners();
+      }
     } catch (e) {
       _status = AdvanceSalaryReportStatus.error;
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
@@ -116,8 +80,10 @@ class AdvanceSalaryReportViewModel extends ChangeNotifier {
     }
   }
 
-  void refresh() {
-    loadAdvanceSalaryReportData();
+  void refresh({
+    String? cookie,
+  }) {
+    loadAdvanceSalaryReportData(cookie: cookie);
   }
 }
 

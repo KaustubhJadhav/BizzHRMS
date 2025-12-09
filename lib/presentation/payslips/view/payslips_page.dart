@@ -33,20 +33,26 @@ class _PayslipsPageState extends State<PayslipsPage> {
 
     if (_searchQuery.isNotEmpty) {
       payslips = payslips.where((payslip) {
-        final paymentId = payslip['payment_id']?.toString().toLowerCase() ?? '';
-        final paymentMonth = payslip['payment_month']?.toString().toLowerCase() ?? '';
-        final paymentType = payslip['payment_type']?.toString().toLowerCase() ?? '';
+        final payslipId = payslip['payslip_id']?.toString().toLowerCase() ?? '';
+        final employeeId =
+            payslip['employee_id']?.toString().toLowerCase() ?? '';
+        final monthPayment =
+            payslip['month_payment']?.toString().toLowerCase() ?? '';
+        final paymentMethod =
+            payslip['payment_method']?.toString().toLowerCase() ?? '';
         final query = _searchQuery.toLowerCase();
-        return paymentId.contains(query) ||
-            paymentMonth.contains(query) ||
-            paymentType.contains(query);
+        return payslipId.contains(query) ||
+            employeeId.contains(query) ||
+            monthPayment.contains(query) ||
+            paymentMethod.contains(query);
       }).toList();
     }
 
     return payslips;
   }
 
-  List<Map<String, dynamic>> _getPaginatedPayslips(PayslipsViewModel viewModel) {
+  List<Map<String, dynamic>> _getPaginatedPayslips(
+      PayslipsViewModel viewModel) {
     final filtered = _getFilteredPayslips(viewModel);
     final startIndex = (_currentPage - 1) * _entriesPerPage;
     final endIndex = startIndex + _entriesPerPage;
@@ -58,172 +64,6 @@ class _PayslipsPageState extends State<PayslipsPage> {
 
   int _getTotalPages(PayslipsViewModel viewModel) {
     return (_getFilteredPayslips(viewModel).length / _entriesPerPage).ceil();
-  }
-
-  void _showPayslipDetails(BuildContext context, Map<String, dynamic> payslip) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 600),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'View Payslip Details',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-              ),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        _buildDetailRow(
-                          'Payment ID',
-                          payslip['payment_id']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Paid Amount',
-                          payslip['paid_amount'] != null
-                              ? '₹ ${payslip['paid_amount'].toStringAsFixed(2)}'
-                              : 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Payment Month',
-                          payslip['payment_month']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Payment Date',
-                          payslip['payment_date']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Payment Type',
-                          payslip['payment_type']?.toString() ?? 'N/A',
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        // TODO: Implement PDF download
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Payslip download feature coming soon')),
-                        );
-                      },
-                      icon: const Icon(Icons.download),
-                      label: const Text('Download Payslip'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2C3E50),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2C3E50),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                      child: const Text('Close'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.grey.shade200,
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 160,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey.shade700,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF2C3E50),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -431,7 +271,7 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                           DataColumn(
                                             label: Row(
                                               children: [
-                                                Text('Payment ID'),
+                                                Text('Payslip ID'),
                                                 SizedBox(width: 4),
                                                 Icon(Icons.swap_vert, size: 16),
                                               ],
@@ -440,7 +280,7 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                           DataColumn(
                                             label: Row(
                                               children: [
-                                                Text('Paid Amount'),
+                                                Text('Employee ID'),
                                                 SizedBox(width: 4),
                                                 Icon(Icons.swap_vert, size: 16),
                                               ],
@@ -449,7 +289,7 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                           DataColumn(
                                             label: Row(
                                               children: [
-                                                Text('Payment Month'),
+                                                Text('Payment Amount'),
                                                 SizedBox(width: 4),
                                                 Icon(Icons.swap_vert, size: 16),
                                               ],
@@ -458,7 +298,7 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                           DataColumn(
                                             label: Row(
                                               children: [
-                                                Text('Payment Date'),
+                                                Text('Month Payment'),
                                                 SizedBox(width: 4),
                                                 Icon(Icons.swap_vert, size: 16),
                                               ],
@@ -467,7 +307,7 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                           DataColumn(
                                             label: Row(
                                               children: [
-                                                Text('Payment Type'),
+                                                Text('Created At'),
                                                 SizedBox(width: 4),
                                                 Icon(Icons.swap_vert, size: 16),
                                               ],
@@ -476,7 +316,16 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                           DataColumn(
                                             label: Row(
                                               children: [
-                                                Text('Payslip'),
+                                                Text('Payment Method'),
+                                                SizedBox(width: 4),
+                                                Icon(Icons.swap_vert, size: 16),
+                                              ],
+                                            ),
+                                          ),
+                                          DataColumn(
+                                            label: Row(
+                                              children: [
+                                                Text('Payslips'),
                                                 SizedBox(width: 4),
                                                 Icon(Icons.swap_vert, size: 16),
                                               ],
@@ -495,25 +344,48 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                                     color: Colors.grey,
                                                   ),
                                                   onPressed: () {
-                                                    _showPayslipDetails(
-                                                        context, payslip);
+                                                    Navigator.pushNamed(
+                                                      context,
+                                                      AppConstants
+                                                          .routePayslipDetails,
+                                                      arguments: {
+                                                        'pay_id': payslip[
+                                                                    'payslip_id']
+                                                                ?.toString() ??
+                                                            '',
+                                                      },
+                                                    );
                                                   },
                                                 ),
                                               ),
                                               DataCell(
                                                 Text(
-                                                  payslip['payment_id']
+                                                  payslip['payslip_id']
                                                           ?.toString() ??
                                                       'N/A',
                                                   style: const TextStyle(
                                                       fontSize: 14,
-                                                      fontWeight: FontWeight.w500),
+                                                      fontWeight:
+                                                          FontWeight.w500),
                                                 ),
                                               ),
                                               DataCell(
                                                 Text(
-                                                  payslip['paid_amount'] != null
-                                                      ? '₹ ${payslip['paid_amount'].toStringAsFixed(2)}'
+                                                  payslip['employee_id']
+                                                          ?.toString() ??
+                                                      'N/A',
+                                                  style: const TextStyle(
+                                                      fontSize: 14),
+                                                ),
+                                              ),
+                                              DataCell(
+                                                Text(
+                                                  payslip['payment_amount'] !=
+                                                              null &&
+                                                          payslip['payment_amount']
+                                                              .toString()
+                                                              .isNotEmpty
+                                                      ? '₹ ${payslip['payment_amount']}'
                                                       : 'N/A',
                                                   style: const TextStyle(
                                                       fontSize: 14),
@@ -521,7 +393,7 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                               ),
                                               DataCell(
                                                 Text(
-                                                  payslip['payment_month']
+                                                  payslip['month_payment']
                                                           ?.toString() ??
                                                       'N/A',
                                                   style: const TextStyle(
@@ -530,7 +402,7 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                               ),
                                               DataCell(
                                                 Text(
-                                                  payslip['payment_date']
+                                                  payslip['created_at']
                                                           ?.toString() ??
                                                       'N/A',
                                                   style: const TextStyle(
@@ -539,7 +411,7 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                               ),
                                               DataCell(
                                                 Text(
-                                                  payslip['payment_type']
+                                                  payslip['payment_method']
                                                           ?.toString() ??
                                                       'N/A',
                                                   style: const TextStyle(
@@ -547,21 +419,39 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                                 ),
                                               ),
                                               DataCell(
-                                                IconButton(
-                                                  icon: const Icon(
-                                                    Icons.picture_as_pdf,
-                                                    size: 20,
-                                                    color: Colors.red,
-                                                  ),
+                                                ElevatedButton.icon(
                                                   onPressed: () {
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .showSnackBar(
-                                                      const SnackBar(
-                                                          content: Text(
-                                                              'Payslip download feature coming soon')),
+                                                    Navigator.pushNamed(
+                                                      context,
+                                                      AppConstants
+                                                          .routeGeneratePayslips,
+                                                      arguments: {
+                                                        'payment_id': payslip[
+                                                                    'payslip_id']
+                                                                ?.toString() ??
+                                                            '',
+                                                      },
                                                     );
                                                   },
+                                                  icon: const Icon(
+                                                    Icons.add,
+                                                    size: 16,
+                                                  ),
+                                                  label: const Text('Generate'),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        Colors.blue,
+                                                    foregroundColor:
+                                                        Colors.white,
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 8,
+                                                    ),
+                                                    minimumSize:
+                                                        const Size(0, 32),
+                                                  ),
                                                 ),
                                               ),
                                             ],
@@ -578,7 +468,8 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                         _getFilteredPayslips(viewModel);
                                     final paginatedPayslips =
                                         _getPaginatedPayslips(viewModel);
-                                    final totalPages = _getTotalPages(viewModel);
+                                    final totalPages =
+                                        _getTotalPages(viewModel);
 
                                     return LayoutBuilder(
                                       builder: (context, constraints) {
@@ -609,7 +500,8 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                                             });
                                                           }
                                                         : null,
-                                                    child: const Text('Previous'),
+                                                    child:
+                                                        const Text('Previous'),
                                                   ),
                                                   ...List.generate(
                                                     totalPages,
@@ -635,7 +527,8 @@ class _PayslipsPageState extends State<PayslipsPage> {
                                                                   ? Colors.white
                                                                   : null,
                                                           minimumSize:
-                                                              const Size(40, 40),
+                                                              const Size(
+                                                                  40, 40),
                                                           padding:
                                                               EdgeInsets.zero,
                                                         ),
@@ -776,4 +669,3 @@ class _PayslipsPageState extends State<PayslipsPage> {
     );
   }
 }
-

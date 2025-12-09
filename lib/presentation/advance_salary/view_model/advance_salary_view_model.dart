@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'package:bizzhrms_flutter_app/core/utils/preferences_helper.dart';
+import 'package:bizzhrms_flutter_app/data/data_sources/remote_data_source.dart';
 
 enum AdvanceSalaryStatus { initial, loading, success, error }
 
 class AdvanceSalaryViewModel extends ChangeNotifier {
   AdvanceSalaryStatus _status = AdvanceSalaryStatus.initial;
   String? _errorMessage;
+  final RemoteDataSource _remoteDataSource = RemoteDataSource();
 
   AdvanceSalaryStatus get status => _status;
   String? get errorMessage => _errorMessage;
@@ -15,120 +18,60 @@ class AdvanceSalaryViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> get advanceSalaryList => _advanceSalaryList;
   int get total => _total;
 
-  Future<void> loadAdvanceSalaryData() async {
+  Future<void> loadAdvanceSalaryData({
+    String? cookie,
+  }) async {
     _status = AdvanceSalaryStatus.loading;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Get token from preferences
+      final token = PreferencesHelper.getUserToken();
+      if (token == null || token.isEmpty) {
+        _status = AdvanceSalaryStatus.error;
+        _errorMessage = 'User not authenticated';
+        notifyListeners();
+        return;
+      }
 
-      _advanceSalaryList = [
-        {
-          'id': 1,
-          'employee': 'John Doe',
-          'amount': 25000.00,
-          'month_year': 'January 2024',
-          'one_time_deduct': 'Yes',
-          'emi': 0.00,
-          'created_at': '2024-01-05',
-          'status': 'Approved', // Approved, Pending, Rejected
-        },
-        {
-          'id': 2,
-          'employee': 'Jane Smith',
-          'amount': 30000.00,
-          'month_year': 'February 2024',
-          'one_time_deduct': 'No',
-          'emi': 10000.00,
-          'created_at': '2024-02-10',
-          'status': 'Pending',
-        },
-        {
-          'id': 3,
-          'employee': 'Alice Brown',
-          'amount': 20000.00,
-          'month_year': 'March 2024',
-          'one_time_deduct': 'Yes',
-          'emi': 0.00,
-          'created_at': '2024-03-15',
-          'status': 'Approved',
-        },
-        {
-          'id': 4,
-          'employee': 'Bob Johnson',
-          'amount': 35000.00,
-          'month_year': 'April 2024',
-          'one_time_deduct': 'No',
-          'emi': 11666.67,
-          'created_at': '2024-04-20',
-          'status': 'Rejected',
-        },
-        {
-          'id': 5,
-          'employee': 'Charlie Green',
-          'amount': 15000.00,
-          'month_year': 'May 2024',
-          'one_time_deduct': 'Yes',
-          'emi': 0.00,
-          'created_at': '2024-05-01',
-          'status': 'Approved',
-        },
-        {
-          'id': 6,
-          'employee': 'Diana Prince',
-          'amount': 40000.00,
-          'month_year': 'June 2024',
-          'one_time_deduct': 'No',
-          'emi': 13333.33,
-          'created_at': '2024-06-10',
-          'status': 'Pending',
-        },
-        {
-          'id': 7,
-          'employee': 'Eve Adams',
-          'amount': 18000.00,
-          'month_year': 'July 2024',
-          'one_time_deduct': 'Yes',
-          'emi': 0.00,
-          'created_at': '2024-07-15',
-          'status': 'Approved',
-        },
-        {
-          'id': 8,
-          'employee': 'Frank White',
-          'amount': 28000.00,
-          'month_year': 'August 2024',
-          'one_time_deduct': 'No',
-          'emi': 9333.33,
-          'created_at': '2024-08-20',
-          'status': 'Pending',
-        },
-        {
-          'id': 9,
-          'employee': 'Grace Lee',
-          'amount': 22000.00,
-          'month_year': 'September 2024',
-          'one_time_deduct': 'Yes',
-          'emi': 0.00,
-          'created_at': '2024-09-05',
-          'status': 'Approved',
-        },
-        {
-          'id': 10,
-          'employee': 'Harry Green',
-          'amount': 32000.00,
-          'month_year': 'October 2024',
-          'one_time_deduct': 'No',
-          'emi': 10666.67,
-          'created_at': '2024-10-12',
-          'status': 'Rejected',
-        },
-      ];
+      // Call API
+      final response = await _remoteDataSource.getAdvanceSalaryList(
+        token,
+        cookie,
+      );
 
-      _total = _advanceSalaryList.length;
-      _status = AdvanceSalaryStatus.success;
-      notifyListeners();
+      if (response['status'] == true) {
+        _total = response['total'] ?? 0;
+        final data = response['data'] as List<dynamic>?;
+        
+        if (data != null) {
+          _advanceSalaryList = data.map((item) {
+            final advanceSalary = item as Map<String, dynamic>;
+            // Map API fields to UI-friendly format
+            return {
+              'employee_id': advanceSalary['employee_id']?.toString() ?? '',
+              'employee_name': advanceSalary['employee_name']?.toString() ?? '',
+              'advance_amount': advanceSalary['advance_amount']?.toString() ?? '',
+              'month_year': advanceSalary['month_year']?.toString() ?? '',
+              'one_time_deduct': advanceSalary['one_time_deduct']?.toString() ?? '',
+              'monthly_installment': advanceSalary['monthly_installment']?.toString() ?? '',
+              'reason': advanceSalary['reason']?.toString() ?? '',
+              'status': advanceSalary['status']?.toString() ?? '',
+              'created_at': advanceSalary['created_at']?.toString() ?? '',
+            };
+          }).toList();
+        } else {
+          _advanceSalaryList = [];
+        }
+        
+        _status = AdvanceSalaryStatus.success;
+        notifyListeners();
+      } else {
+        _status = AdvanceSalaryStatus.error;
+        _errorMessage = response['message']?.toString() ?? 'Failed to load advance salary list';
+        notifyListeners();
+      }
     } catch (e) {
       _status = AdvanceSalaryStatus.error;
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
@@ -136,8 +79,55 @@ class AdvanceSalaryViewModel extends ChangeNotifier {
     }
   }
 
-  void refresh() {
-    loadAdvanceSalaryData();
+  void refresh({
+    String? cookie,
+  }) {
+    loadAdvanceSalaryData(cookie: cookie);
+  }
+
+  /// Add Advance Salary
+  Future<bool> addAdvanceSalary({
+    required String monthYear,
+    required String amount,
+    required String reason,
+    required String oneTimeDeduct,
+    required String monthlyInstallment,
+    String? cookie,
+  }) async {
+    try {
+      // Get token from preferences
+      final token = PreferencesHelper.getUserToken();
+      if (token == null || token.isEmpty) {
+        _errorMessage = 'User not authenticated';
+        notifyListeners();
+        return false;
+      }
+
+      // Call API
+      final response = await _remoteDataSource.addAdvanceSalary(
+        token,
+        cookie,
+        monthYear,
+        amount,
+        reason,
+        oneTimeDeduct,
+        monthlyInstallment,
+      );
+
+      if (response['status'] == true) {
+        // Refresh the list after successful addition
+        await loadAdvanceSalaryData(cookie: cookie);
+        return true;
+      } else {
+        _errorMessage = response['message']?.toString() ?? 'Failed to add advance salary';
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
   }
 }
 

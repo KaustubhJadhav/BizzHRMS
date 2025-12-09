@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'package:bizzhrms_flutter_app/core/utils/preferences_helper.dart';
+import 'package:bizzhrms_flutter_app/data/data_sources/remote_data_source.dart';
 
 enum PayslipsStatus { initial, loading, success, error }
 
 class PayslipsViewModel extends ChangeNotifier {
   PayslipsStatus _status = PayslipsStatus.initial;
   String? _errorMessage;
+  final RemoteDataSource _remoteDataSource = RemoteDataSource();
 
   PayslipsStatus get status => _status;
   String? get errorMessage => _errorMessage;
@@ -15,102 +18,67 @@ class PayslipsViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> get payslipsList => _payslipsList;
   int get total => _total;
 
-  Future<void> loadPayslipsData() async {
+  Future<void> loadPayslipsData({
+    String? monthYear,
+    String? amount,
+    String? reason,
+    String? oneTimeDeduct,
+    String? monthlyInstallment,
+    String? cookie,
+  }) async {
     _status = PayslipsStatus.loading;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      // Simulate API call delay
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Get token from preferences
+      final token = PreferencesHelper.getUserToken();
+      if (token == null || token.isEmpty) {
+        _status = PayslipsStatus.error;
+        _errorMessage = 'User not authenticated';
+        notifyListeners();
+        return;
+      }
 
-      // Dummy data matching the HTML table structure
-      _payslipsList = [
-        {
-          'id': 1,
-          'payment_id': 'PAY001',
-          'paid_amount': 50000.00,
-          'payment_month': 'January 2024',
-          'payment_date': '2024-01-31',
-          'payment_type': 'Monthly',
-        },
-        {
-          'id': 2,
-          'payment_id': 'PAY002',
-          'paid_amount': 50000.00,
-          'payment_month': 'February 2024',
-          'payment_date': '2024-02-29',
-          'payment_type': 'Monthly',
-        },
-        {
-          'id': 3,
-          'payment_id': 'PAY003',
-          'paid_amount': 50000.00,
-          'payment_month': 'March 2024',
-          'payment_date': '2024-03-31',
-          'payment_type': 'Monthly',
-        },
-        {
-          'id': 4,
-          'payment_id': 'PAY004',
-          'paid_amount': 50000.00,
-          'payment_month': 'April 2024',
-          'payment_date': '2024-04-30',
-          'payment_type': 'Monthly',
-        },
-        {
-          'id': 5,
-          'payment_id': 'PAY005',
-          'paid_amount': 50000.00,
-          'payment_month': 'May 2024',
-          'payment_date': '2024-05-31',
-          'payment_type': 'Monthly',
-        },
-        {
-          'id': 6,
-          'payment_id': 'PAY006',
-          'paid_amount': 50000.00,
-          'payment_month': 'June 2024',
-          'payment_date': '2024-06-30',
-          'payment_type': 'Monthly',
-        },
-        {
-          'id': 7,
-          'payment_id': 'PAY007',
-          'paid_amount': 50000.00,
-          'payment_month': 'July 2024',
-          'payment_date': '2024-07-31',
-          'payment_type': 'Monthly',
-        },
-        {
-          'id': 8,
-          'payment_id': 'PAY008',
-          'paid_amount': 50000.00,
-          'payment_month': 'August 2024',
-          'payment_date': '2024-08-31',
-          'payment_type': 'Monthly',
-        },
-        {
-          'id': 9,
-          'payment_id': 'PAY009',
-          'paid_amount': 50000.00,
-          'payment_month': 'September 2024',
-          'payment_date': '2024-09-30',
-          'payment_type': 'Monthly',
-        },
-        {
-          'id': 10,
-          'payment_id': 'PAY010',
-          'paid_amount': 50000.00,
-          'payment_month': 'October 2024',
-          'payment_date': '2024-10-31',
-          'payment_type': 'Monthly',
-        },
-      ];
+      // Use provided values or defaults
+      final response = await _remoteDataSource.getPayslipList(
+        token,
+        cookie, // Cookie is optional
+        monthYear ?? '', // Default empty if not provided
+        amount ?? '', // Default empty if not provided
+        reason ?? '', // Default empty if not provided
+        oneTimeDeduct ?? '0', // Default '0' if not provided
+        monthlyInstallment ?? '', // Default empty if not provided
+      );
 
-      _total = _payslipsList.length;
-      _status = PayslipsStatus.success;
-      notifyListeners();
+      if (response['status'] == true) {
+        _total = response['total'] ?? 0;
+        final data = response['data'] as List<dynamic>?;
+        
+        if (data != null) {
+          _payslipsList = data.map((item) {
+            final payslip = item as Map<String, dynamic>;
+            // Map API fields to UI-friendly format
+            return {
+              'payslip_id': payslip['payslip_id']?.toString() ?? '',
+              'employee_id': payslip['employee_id']?.toString() ?? '',
+              'payment_amount': payslip['payment_amount']?.toString() ?? '',
+              'month_payment': payslip['month_payment']?.toString() ?? '',
+              'created_at': payslip['created_at']?.toString() ?? '',
+              'payment_method': payslip['payment_method']?.toString() ?? '',
+            };
+          }).toList();
+        } else {
+          _payslipsList = [];
+        }
+        
+        _status = PayslipsStatus.success;
+        notifyListeners();
+      } else {
+        _status = PayslipsStatus.error;
+        _errorMessage = response['message']?.toString() ?? 'Failed to load payslips';
+        notifyListeners();
+      }
     } catch (e) {
       _status = PayslipsStatus.error;
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
@@ -118,8 +86,22 @@ class PayslipsViewModel extends ChangeNotifier {
     }
   }
 
-  void refresh() {
-    loadPayslipsData();
+  void refresh({
+    String? monthYear,
+    String? amount,
+    String? reason,
+    String? oneTimeDeduct,
+    String? monthlyInstallment,
+    String? cookie,
+  }) {
+    loadPayslipsData(
+      monthYear: monthYear,
+      amount: amount,
+      reason: reason,
+      oneTimeDeduct: oneTimeDeduct,
+      monthlyInstallment: monthlyInstallment,
+      cookie: cookie,
+    );
   }
 }
 
