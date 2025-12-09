@@ -1,10 +1,14 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:bizzhrms_flutter_app/core/utils/preferences_helper.dart';
+import 'package:bizzhrms_flutter_app/data/data_sources/remote_data_source.dart';
 
 enum OfficeShiftStatus { initial, loading, success, error }
 
 class OfficeShiftViewModel extends ChangeNotifier {
   OfficeShiftStatus _status = OfficeShiftStatus.initial;
   String? _errorMessage;
+  final RemoteDataSource _remoteDataSource = RemoteDataSource();
 
   OfficeShiftStatus get status => _status;
   String? get errorMessage => _errorMessage;
@@ -20,57 +24,58 @@ class OfficeShiftViewModel extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 500));
-
     try {
-      // Dummy data matching the HTML table structure
-      _officeShiftsList = [
-        {
-          'office_shift': 'Morning Shift',
-          'duration': '09:00 - 17:00',
-        },
-        {
-          'office_shift': 'Afternoon Shift',
-          'duration': '13:00 - 21:00',
-        },
-        {
-          'office_shift': 'Night Shift',
-          'duration': '21:00 - 05:00',
-        },
-        {
-          'office_shift': 'Flexible Shift',
-          'duration': '10:00 - 18:00',
-        },
-        {
-          'office_shift': 'Part-time Morning',
-          'duration': '09:00 - 13:00',
-        },
-        {
-          'office_shift': 'Part-time Evening',
-          'duration': '17:00 - 21:00',
-        },
-        {
-          'office_shift': 'Weekend Shift',
-          'duration': '10:00 - 16:00',
-        },
-        {
-          'office_shift': 'Rotating Shift',
-          'duration': '08:00 - 16:00',
-        },
-        {
-          'office_shift': 'Extended Shift',
-          'duration': '08:00 - 18:00',
-        },
-        {
-          'office_shift': 'Short Shift',
-          'duration': '10:00 - 14:00',
-        },
-      ];
+      // Get token from preferences
+      final token = await PreferencesHelper.getUserToken();
 
-      _total = _officeShiftsList.length;
-      _status = OfficeShiftStatus.success;
-      notifyListeners();
+      if (token == null || token.isEmpty) {
+        _status = OfficeShiftStatus.error;
+        _errorMessage = 'User not authenticated';
+        notifyListeners();
+        return;
+      }
+
+      // Fetch office shift list from API
+      final response = await _remoteDataSource.getOfficeShiftList(token);
+
+      if (response['status'] == true) {
+        // Use total from API response if available
+        if (response['total'] != null) {
+          _total = response['total'] is int 
+              ? response['total'] 
+              : int.tryParse(response['total'].toString()) ?? 0;
+        }
+
+        // Handle data array and map fields
+        if (response['data'] != null && response['data'] is List) {
+          _officeShiftsList = (response['data'] as List).map((item) {
+            final shift = item as Map<String, dynamic>;
+            // Map API fields to UI expected fields
+            return {
+              ...shift, // Keep all original fields
+              'office_shift': shift['shift_name']?.toString() ?? '',
+              'duration': shift['shift_date']?.toString() ?? '',
+            };
+          }).toList();
+          
+          // Update total from list length if API total wasn't provided
+          if (_total == 0) {
+            _total = _officeShiftsList.length;
+          }
+        } else {
+          _officeShiftsList = [];
+          if (_total == 0) {
+            _total = 0;
+          }
+        }
+
+        _status = OfficeShiftStatus.success;
+        notifyListeners();
+      } else {
+        _status = OfficeShiftStatus.error;
+        _errorMessage = response['message']?.toString() ?? 'Failed to load office shifts';
+        notifyListeners();
+      }
     } catch (e) {
       _status = OfficeShiftStatus.error;
       _errorMessage = e.toString().replaceFirst('Exception: ', '');

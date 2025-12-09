@@ -73,177 +73,105 @@ class _TicketsPageState extends State<TicketsPage> {
 
   void _showTicketDetails(BuildContext context, Map<String, dynamic> ticket,
       TicketsViewModel viewModel) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 600),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with title and close button
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'View Ticket Details',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-              ),
-              // Content
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        _buildDetailRow(
-                          'Ticket Code',
-                          ticket['ticket_code']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Subject',
-                          ticket['subject']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Employee',
-                          ticket['employee']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Priority',
-                          viewModel.getPriorityText(ticket['priority'] ?? 0),
-                        ),
-                        _buildDetailRow(
-                          'Status',
-                          ticket['status']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Date',
-                          ticket['date']?.toString() ?? 'N/A',
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Footer with Close button
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2C3E50),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                      child: const Text('Close'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+    // Try to get ticket_id from the ticket object
+    final ticketId = ticket['ticket_id']?.toString() ?? '';
 
-  Widget _buildDetailRow(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.grey.shade200,
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey.shade700,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF2C3E50),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _handleAddTicket() {
-    if (_formKey.currentState!.validate()) {
-      // Here you would normally submit to API
-      // For now, just show a success message and hide the form
+    if (ticketId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Ticket created successfully!'),
-          backgroundColor: Colors.green,
+          content: Text('Ticket ID not available'),
+          duration: Duration(seconds: 2),
         ),
       );
-      setState(() {
-        _showAddForm = false;
-        _subjectController.clear();
-        _descriptionController.clear();
-        _selectedPriority = null;
-      });
+      return;
+    }
+
+    // Navigate to ticket details page
+    Navigator.pushNamed(
+      context,
+      AppConstants.routeTicketDetails,
+      arguments: {
+        'ticket_id': ticketId,
+        'ticket': ticket,
+      },
+    );
+  }
+
+  Future<void> _handleAddTicket(TicketsViewModel viewModel) async {
+    if (_formKey.currentState!.validate()) {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      try {
+        final result = await viewModel.addTicket(
+          _subjectController.text.trim(),
+          _descriptionController.text.trim(),
+          _selectedPriority ?? 2, // Default to Medium if somehow null
+        );
+
+        // Hide loading indicator
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+
+        if (result != null && result['error'] == null) {
+          // Success
+          final ticketCode = result['ticket_code']?.toString() ?? '';
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  ticketCode.isNotEmpty
+                      ? 'Ticket created successfully! Code: $ticketCode'
+                      : 'Ticket created successfully!',
+                ),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+          setState(() {
+            _showAddForm = false;
+            _subjectController.clear();
+            _descriptionController.clear();
+            _selectedPriority = null;
+          });
+        } else {
+          // Error
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                    result?['error']?.toString() ?? 'Failed to create ticket'),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        // Hide loading indicator
+        if (mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${e.toString()}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
     }
   }
 
-  Widget _buildAddTicketForm() {
+  Widget _buildAddTicketForm(TicketsViewModel viewModel) {
     if (!_showAddForm) return const SizedBox.shrink();
 
     return Card(
@@ -436,7 +364,7 @@ class _TicketsPageState extends State<TicketsPage> {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: _handleAddTicket,
+                onPressed: () => _handleAddTicket(viewModel),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2C3E50),
                   foregroundColor: Colors.white,
@@ -493,7 +421,7 @@ class _TicketsPageState extends State<TicketsPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Add Ticket Form
-                              _buildAddTicketForm(),
+                              _buildAddTicketForm(viewModel),
 
                               // Tickets List Card
                               Card(

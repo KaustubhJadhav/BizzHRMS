@@ -1,11 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:bizzhrms_flutter_app/core/utils/preferences_helper.dart';
+import 'package:bizzhrms_flutter_app/data/data_sources/remote_data_source.dart';
 
 enum JobAppliedStatus { initial, loading, success, error }
 
 class JobAppliedViewModel extends ChangeNotifier {
   JobAppliedStatus _status = JobAppliedStatus.initial;
   String? _errorMessage;
+  final RemoteDataSource _remoteDataSource = RemoteDataSource();
 
   JobAppliedStatus get status => _status;
   String? get errorMessage => _errorMessage;
@@ -40,87 +43,61 @@ class JobAppliedViewModel extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 500));
-
     try {
-      // Dummy data matching the HTML table structure
-      _jobsAppliedList = [
-        {
-          'job_title': 'Senior Software Engineer',
-          'candidate_name': 'John Doe',
-          'email': 'john.doe@example.com',
-          'status': 'Pending',
-          'apply_date': '2024-12-01',
-        },
-        {
-          'job_title': 'Product Manager',
-          'candidate_name': 'Jane Smith',
-          'email': 'jane.smith@example.com',
-          'status': 'Shortlisted',
-          'apply_date': '2024-11-28',
-        },
-        {
-          'job_title': 'UX Designer',
-          'candidate_name': 'Mike Johnson',
-          'email': 'mike.johnson@example.com',
-          'status': 'Interview',
-          'apply_date': '2024-11-25',
-        },
-        {
-          'job_title': 'Data Analyst',
-          'candidate_name': 'Sarah Williams',
-          'email': 'sarah.williams@example.com',
-          'status': 'Rejected',
-          'apply_date': '2024-11-20',
-        },
-        {
-          'job_title': 'Marketing Manager',
-          'candidate_name': 'David Brown',
-          'email': 'david.brown@example.com',
-          'status': 'Hired',
-          'apply_date': '2024-11-18',
-        },
-        {
-          'job_title': 'DevOps Engineer',
-          'candidate_name': 'Emily Davis',
-          'email': 'emily.davis@example.com',
-          'status': 'Pending',
-          'apply_date': '2024-11-15',
-        },
-        {
-          'job_title': 'Sales Executive',
-          'candidate_name': 'Robert Wilson',
-          'email': 'robert.wilson@example.com',
-          'status': 'Shortlisted',
-          'apply_date': '2024-11-12',
-        },
-        {
-          'job_title': 'HR Manager',
-          'candidate_name': 'Lisa Anderson',
-          'email': 'lisa.anderson@example.com',
-          'status': 'Interview',
-          'apply_date': '2024-11-10',
-        },
-        {
-          'job_title': 'Financial Analyst',
-          'candidate_name': 'James Taylor',
-          'email': 'james.taylor@example.com',
-          'status': 'Pending',
-          'apply_date': '2024-11-08',
-        },
-        {
-          'job_title': 'Content Writer',
-          'candidate_name': 'Maria Garcia',
-          'email': 'maria.garcia@example.com',
-          'status': 'Rejected',
-          'apply_date': '2024-11-05',
-        },
-      ];
+      // Get token from preferences
+      final token = await PreferencesHelper.getUserToken();
 
-      _total = _jobsAppliedList.length;
-      _status = JobAppliedStatus.success;
-      notifyListeners();
+      if (token == null || token.isEmpty) {
+        _status = JobAppliedStatus.error;
+        _errorMessage = 'User not authenticated';
+        notifyListeners();
+        return;
+      }
+
+      // Fetch job applied list from API
+      final response = await _remoteDataSource.getJobAppliedList(token);
+
+      if (response['status'] == true) {
+        // Use total from API response if available
+        if (response['total'] != null) {
+          _total = response['total'] is int 
+              ? response['total'] 
+              : int.tryParse(response['total'].toString()) ?? 0;
+        }
+
+        // Handle data array and map fields
+        if (response['data'] != null && response['data'] is List) {
+          _jobsAppliedList = (response['data'] as List).map((item) {
+            final jobApplied = item as Map<String, dynamic>;
+            // Map API fields to UI expected fields
+            return {
+              ...jobApplied, // Keep all original fields for details page
+              'job_title': jobApplied['application_title']?.toString() ?? '',
+              'candidate_name': jobApplied['employee_name']?.toString() ?? '',
+              'email': jobApplied['employee_email']?.toString() ?? '',
+              'status': jobApplied['application_status']?.toString() ?? '',
+              'apply_date': jobApplied['created_at']?.toString() ?? '',
+            };
+          }).toList();
+          
+          // Update total from list length if API total wasn't provided
+          if (_total == 0) {
+            _total = _jobsAppliedList.length;
+          }
+        } else {
+          _jobsAppliedList = [];
+          if (_total == 0) {
+            _total = 0;
+          }
+        }
+
+        _status = JobAppliedStatus.success;
+        notifyListeners();
+      } else {
+        _status = JobAppliedStatus.error;
+        _errorMessage = response['message']?.toString() ?? 'Failed to load jobs applied';
+        notifyListeners();
+      }
     } catch (e) {
       _status = JobAppliedStatus.error;
       _errorMessage = e.toString().replaceFirst('Exception: ', '');

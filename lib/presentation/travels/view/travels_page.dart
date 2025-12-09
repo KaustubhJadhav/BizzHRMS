@@ -66,160 +66,30 @@ class _TravelsPageState extends State<TravelsPage> {
   }
 
   void _showTravelDetails(BuildContext context, Map<String, dynamic> travel) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+    // Try to get travel_id from the travel object
+    final travelId = travel['travel_id']?.toString() ?? '';
+    
+    if (travelId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Travel ID not available'),
+          duration: Duration(seconds: 2),
         ),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 600),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with title and close button
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'View Travel Details',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-              ),
-              // Content
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        _buildDetailRow(
-                          'Employee',
-                          travel['employee']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Purpose of Visit',
-                          travel['purpose_of_visit']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Place of Visit',
-                          travel['place_of_visit']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Start Date',
-                          travel['start_date']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'End Date',
-                          travel['end_date']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Approval Status',
-                          travel['approval_status']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Added By',
-                          travel['added_by']?.toString() ?? 'N/A',
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Footer with Close button
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2C3E50),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                      child: const Text('Close'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      );
+      return;
+    }
+
+    // Navigate to travel details page
+    Navigator.pushNamed(
+      context,
+      AppConstants.routeTravelDetails,
+      arguments: {
+        'travel_id': travelId,
+        'travel': travel,
+      },
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.grey.shade200,
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 140,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey.shade700,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF2C3E50),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

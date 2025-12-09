@@ -66,156 +66,30 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
   }
 
   void _showComplaintDetails(BuildContext context, Map<String, dynamic> complaint) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+    // Try to get complaint_id from the complaint object
+    final complaintId = complaint['complaint_id']?.toString() ?? '';
+    
+    if (complaintId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Complaint ID not available'),
+          duration: Duration(seconds: 2),
         ),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 600),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with title and close button
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'View Complaint Details',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-              ),
-              // Content
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        _buildDetailRow(
-                          'Complaint From',
-                          complaint['complaint_from']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Complaint Against',
-                          complaint['complaint_against']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Complaint Title',
-                          complaint['complaint_title']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Complaint Date',
-                          complaint['complaint_date']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Approval Status',
-                          complaint['approval_status']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Details',
-                          complaint['details']?.toString() ?? 'N/A',
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Footer with Close button
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2C3E50),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                      child: const Text('Close'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      );
+      return;
+    }
+
+    // Navigate to complaint details page
+    Navigator.pushNamed(
+      context,
+      AppConstants.routeComplaintDetails,
+      arguments: {
+        'complaint_id': complaintId,
+        'complaint': complaint,
+      },
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.grey.shade200,
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 140,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey.shade700,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF2C3E50),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

@@ -1003,6 +1003,700 @@ class RemoteDataSource extends BaseDataSource {
     }
   }
 
+  /// Get Job Applied List API - requires Bearer token
+  /// Returns: {status: bool, message: String, total: int, data: [...]}
+  Future<Map<String, dynamic>> getJobAppliedList(String token) async {
+    try {
+      final response = await _dio.post(
+        AppConstants.jobAppliedListEndpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch job applied list');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch job applied list');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Job Interview List API - requires Bearer token
+  /// Returns: {status: bool, message: String, total: int, data: [...]}
+  Future<Map<String, dynamic>> getJobInterviewList(String token) async {
+    try {
+      final response = await _dio.post(
+        AppConstants.jobInterviewListEndpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch job interview list');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch job interview list');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Complaint List API - requires Bearer token
+  /// Returns: {status: bool, message: String, total: int, data: [...]}
+  Future<Map<String, dynamic>> getComplaintList(String token) async {
+    try {
+      final response = await _dio.post(
+        AppConstants.complaintListEndpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch complaint list');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch complaint list');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Complaint Detail by ID API - requires Bearer token and complaint_id
+  /// Returns: {status: bool, message: String, data: [...]}
+  Future<Map<String, dynamic>> getComplaintDetailById(
+      String token, String complaintId) async {
+    try {
+      // Use FormData as per API requirements
+      final formData = FormData.fromMap({
+        'complaint_id': complaintId,
+      });
+
+      final response = await _dio.post(
+        AppConstants.complaintDetailEndpoint,
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            // Dio will automatically set Content-Type for FormData
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch complaint details');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch complaint details');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Warning List API - requires Bearer token
+  /// Returns: {status: bool, message: String, total: int, data: [...]}
+  Future<Map<String, dynamic>> getWarningList(String token) async {
+    try {
+      final response = await _dio.post(
+        AppConstants.warningListEndpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch warning list');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch warning list');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Warning Detail by ID API - requires Bearer token and warning_id
+  /// Returns: {status: bool, message: String, data: [...]}
+  Future<Map<String, dynamic>> getWarningDetailById(
+      String token, String warningId) async {
+    try {
+      // Use FormData as per API requirements
+      final formData = FormData.fromMap({
+        'warning_id': warningId,
+      });
+
+      final response = await _dio.post(
+        AppConstants.warningDetailEndpoint,
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            // Dio will automatically set Content-Type for FormData
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch warning details');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch warning details');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Travel List API - requires Bearer token
+  /// Returns: {status: bool, message: String, total: int, data: [...]}
+  Future<Map<String, dynamic>> getTravelList(String token) async {
+    try {
+      final response = await _dio.post(
+        AppConstants.travelListEndpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch travel list');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch travel list');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Travel Detail by ID API - requires Bearer token and travel_id
+  /// Returns: {status: bool, message: String, data: {...}}
+  Future<Map<String, dynamic>> getTravelDetailById(
+      String token, String travelId) async {
+    try {
+      // Use FormData as per API requirements
+      final formData = FormData.fromMap({
+        'travel_id': travelId,
+      });
+
+      // Note: API has query parameter but also FormData
+      final response = await _dio.post(
+        '${AppConstants.travelDetailEndpoint}?travel_id=$travelId',
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            // Dio will automatically set Content-Type for FormData
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch travel details');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch travel details');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Office Shift List API - requires Bearer token
+  /// Returns: {status: bool, message: String, total: int, data: [...]}
+  Future<Map<String, dynamic>> getOfficeShiftList(String token) async {
+    try {
+      final response = await _dio.post(
+        AppConstants.officeShiftListEndpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch office shift list');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch office shift list');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Training List API - requires Bearer token
+  /// Returns: {status: bool, message: String, total: int, data: [...]}
+  Future<Map<String, dynamic>> getTrainingList(String token) async {
+    try {
+      final response = await _dio.post(
+        AppConstants.trainingListEndpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch training list');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch training list');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Training Detail by ID API - requires Bearer token and training_id
+  /// Returns: {status: bool, message: String, data: {...}}
+  Future<Map<String, dynamic>> getTrainingDetailById(
+      String token, String trainingId) async {
+    try {
+      // Use FormData as per API requirements
+      final formData = FormData.fromMap({
+        'training_id': trainingId,
+      });
+
+      final response = await _dio.post(
+        AppConstants.trainingDetailEndpoint,
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            // Dio will automatically set Content-Type for FormData
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch training details');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch training details');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Ticket List API - requires Bearer token
+  /// Returns: {status: bool, message: String, total: int, data: [...]}
+  Future<Map<String, dynamic>> getTicketList(String token) async {
+    try {
+      final response = await _dio.post(
+        AppConstants.ticketListEndpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch ticket list');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch ticket list');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Get Ticket Detail by ID API - requires Bearer token and ticket_id
+  /// Returns: {status: bool, message: String, data: {...}}
+  Future<Map<String, dynamic>> getTicketDetailById(
+      String token, String ticketId) async {
+    try {
+      // Use FormData as per API requirements
+      final formData = FormData.fromMap({
+        'ticket_id': ticketId,
+      });
+
+      final response = await _dio.post(
+        AppConstants.ticketDetailEndpoint,
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            // Dio will automatically set Content-Type for FormData
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to fetch ticket details');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to fetch ticket details');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Add Ticket API - requires Bearer token, ticket_subject, ticket_description, and ticket_priority
+  /// Returns: {status: bool, message: String, ticket_code: String}
+  Future<Map<String, dynamic>> addTicket(
+      String token, String subject, String description, String priority) async {
+    try {
+      // Use FormData as per API requirements
+      final formData = FormData.fromMap({
+        'ticket_subject': subject,
+        'ticket_description': description,
+        'ticket_priority': priority,
+      });
+
+      final response = await _dio.post(
+        AppConstants.addTicketEndpoint,
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            // Dio will automatically set Content-Type for FormData
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(responseData['message'] ?? 'Failed to create ticket');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to create ticket');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Edit Ticket API - requires Bearer token, ticket_id, status, remarks, and ticket_note
+  /// Returns: {status: bool, message: String}
+  Future<Map<String, dynamic>> editTicket(String token, String ticketId,
+      String status, String remarks, String ticketNote) async {
+    try {
+      // Use FormData as per API requirements
+      final formData = FormData.fromMap({
+        'ticket_id': ticketId,
+        'status': status,
+        'remarks': remarks,
+        'ticket_note': ticketNote,
+      });
+
+      final response = await _dio.post(
+        AppConstants.editTicketEndpoint,
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            // Dio will automatically set Content-Type for FormData
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(responseData['message'] ?? 'Failed to update ticket');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to update ticket');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Add Ticket Comment API - requires Bearer token, ticket_id, and comment
+  /// Returns: {status: bool, message: String}
+  Future<Map<String, dynamic>> addTicketComment(
+      String token, String ticketId, String comment) async {
+    try {
+      // Use FormData as per API requirements
+      final formData = FormData.fromMap({
+        'ticket_id': ticketId,
+        'comment': comment,
+      });
+
+      final response = await _dio.post(
+        AppConstants.addTicketCommentEndpoint,
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            // Dio will automatically set Content-Type for FormData
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(responseData['message'] ?? 'Failed to add comment');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to add comment');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Delete Ticket Comment API - requires Bearer token and comment_id
+  /// Returns: {status: bool, message: String}
+  Future<Map<String, dynamic>> deleteTicketComment(
+      String token, String commentId) async {
+    try {
+      // Use FormData as per API requirements
+      final formData = FormData.fromMap({
+        'comment_id': commentId,
+      });
+
+      final response = await _dio.post(
+        AppConstants.deleteTicketCommentEndpoint,
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            // Dio will automatically set Content-Type for FormData
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to delete comment');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to delete comment');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Add Ticket Attachment API - requires Bearer token, ticket_id, files, file_title, and file_description
+  /// Returns: {status: bool, message: String}
+  Future<Map<String, dynamic>> addTicketAttachment(
+      String token,
+      String ticketId,
+      List<File> files,
+      String fileTitle,
+      String fileDescription) async {
+    try {
+      // Create FormData with files
+      final formData = FormData();
+
+      // Add files as MultipartFile
+      final multipartFiles = <MultipartFile>[];
+      for (var file in files) {
+        final multipartFile = await MultipartFile.fromFile(
+          file.path,
+          filename: file.path.split(Platform.pathSeparator).last,
+        );
+        multipartFiles.add(multipartFile);
+      }
+
+      // Add fields
+      formData.fields.addAll([
+        MapEntry('ticket_id', ticketId),
+        MapEntry('file_title', fileTitle),
+        MapEntry('file_description', fileDescription),
+      ]);
+
+      // Add files array - use 'files[]' as key for array format
+      for (var file in multipartFiles) {
+        formData.files.add(MapEntry('files[]', file));
+      }
+
+      final response = await _dio.post(
+        AppConstants.addTicketAttachmentEndpoint,
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            // Dio will automatically set Content-Type for FormData with files
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to add attachment');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to add attachment');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
+  /// Delete Ticket Attachment API - requires Bearer token and attachment_id
+  /// Returns: {status: bool, message: String}
+  Future<Map<String, dynamic>> deleteTicketAttachment(
+      String token, String attachmentId) async {
+    try {
+      // Use FormData as per API requirements
+      final formData = FormData.fromMap({
+        'attachment_id': attachmentId,
+      });
+
+      final response = await _dio.post(
+        AppConstants.deleteTicketAttachmentEndpoint,
+        data: formData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            // Dio will automatically set Content-Type for FormData
+          },
+        ),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final responseData = e.response?.data;
+        if (responseData is Map) {
+          throw Exception(
+              responseData['message'] ?? 'Failed to delete attachment');
+        } else if (responseData is String) {
+          throw Exception(responseData);
+        } else {
+          throw Exception('Failed to delete attachment');
+        }
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    }
+  }
+
   /// Save FCM Token API - requires Bearer token, user_id, and token
   /// Returns: {status: int, message: String}
   Future<Map<String, dynamic>> saveFCMToken(

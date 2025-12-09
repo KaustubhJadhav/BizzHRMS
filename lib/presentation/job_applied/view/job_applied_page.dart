@@ -88,11 +88,14 @@ class _JobAppliedPageState extends State<JobAppliedPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'View Job Application Details',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        'View Job Application Details',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     IconButton(
@@ -418,9 +421,10 @@ class _JobAppliedPageState extends State<JobAppliedPage> {
                                         columns: const [
                                           DataColumn(
                                             label: Row(
+                                              mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                Text('Action'),
-                                                SizedBox(width: 4),
+                                                const Text('Action'),
+                                                const SizedBox(width: 4),
                                                 Icon(Icons.swap_vert, size: 16),
                                               ],
                                             ),

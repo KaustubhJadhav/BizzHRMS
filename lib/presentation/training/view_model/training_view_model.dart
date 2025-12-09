@@ -1,11 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:bizzhrms_flutter_app/core/utils/preferences_helper.dart';
+import 'package:bizzhrms_flutter_app/data/data_sources/remote_data_source.dart';
 
 enum TrainingStatus { initial, loading, success, error }
 
 class TrainingViewModel extends ChangeNotifier {
   TrainingStatus _status = TrainingStatus.initial;
   String? _errorMessage;
+  final RemoteDataSource _remoteDataSource = RemoteDataSource();
 
   TrainingStatus get status => _status;
   String? get errorMessage => _errorMessage;
@@ -38,97 +41,77 @@ class TrainingViewModel extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 500));
-
     try {
-      // Dummy data matching the HTML table structure
-      _trainingList = [
-        {
-          'employee': 'John Doe',
-          'training_type': 'Leadership Development',
-          'trainer': 'Dr. Sarah Johnson',
-          'training_duration': '5 Days',
-          'cost': '₹ 25,000',
-          'status': 'Completed',
-        },
-        {
-          'employee': 'Jane Smith',
-          'training_type': 'Project Management',
-          'trainer': 'Michael Brown',
-          'training_duration': '3 Days',
-          'cost': '₹ 15,000',
-          'status': 'In Progress',
-        },
-        {
-          'employee': 'Mike Johnson',
-          'training_type': 'Communication Skills',
-          'trainer': 'Emily Davis',
-          'training_duration': '2 Days',
-          'cost': '₹ 10,000',
-          'status': 'Pending',
-        },
-        {
-          'employee': 'Sarah Williams',
-          'training_type': 'Technical Training',
-          'trainer': 'Robert Wilson',
-          'training_duration': '7 Days',
-          'cost': '₹ 35,000',
-          'status': 'Completed',
-        },
-        {
-          'employee': 'David Brown',
-          'training_type': 'Sales Training',
-          'trainer': 'Lisa Anderson',
-          'training_duration': '4 Days',
-          'cost': '₹ 20,000',
-          'status': 'In Progress',
-        },
-        {
-          'employee': 'Emily Davis',
-          'training_type': 'Customer Service',
-          'trainer': 'James Taylor',
-          'training_duration': '2 Days',
-          'cost': '₹ 8,000',
-          'status': 'Completed',
-        },
-        {
-          'employee': 'Robert Wilson',
-          'training_type': 'Data Analysis',
-          'trainer': 'Maria Garcia',
-          'training_duration': '6 Days',
-          'cost': '₹ 30,000',
-          'status': 'Pending',
-        },
-        {
-          'employee': 'Lisa Anderson',
-          'training_type': 'Team Building',
-          'trainer': 'John Martinez',
-          'training_duration': '1 Day',
-          'cost': '₹ 5,000',
-          'status': 'Completed',
-        },
-        {
-          'employee': 'James Taylor',
-          'training_type': 'Time Management',
-          'trainer': 'Patricia Lee',
-          'training_duration': '2 Days',
-          'cost': '₹ 12,000',
-          'status': 'In Progress',
-        },
-        {
-          'employee': 'Maria Garcia',
-          'training_type': 'Digital Marketing',
-          'trainer': 'Christopher White',
-          'training_duration': '5 Days',
-          'cost': '₹ 22,000',
-          'status': 'Pending',
-        },
-      ];
+      // Get token from preferences
+      final token = await PreferencesHelper.getUserToken();
 
-      _total = _trainingList.length;
-      _status = TrainingStatus.success;
-      notifyListeners();
+      if (token == null || token.isEmpty) {
+        _status = TrainingStatus.error;
+        _errorMessage = 'User not authenticated';
+        notifyListeners();
+        return;
+      }
+
+      // Fetch training list from API
+      final response = await _remoteDataSource.getTrainingList(token);
+
+      if (response['status'] == true) {
+        // Use total from API response if available
+        if (response['total'] != null) {
+          _total = response['total'] is int 
+              ? response['total'] 
+              : int.tryParse(response['total'].toString()) ?? 0;
+        }
+
+        // Handle data array and map fields
+        if (response['data'] != null && response['data'] is List) {
+          _trainingList = (response['data'] as List).map((item) {
+            final training = item as Map<String, dynamic>;
+            
+            // Extract employee names from employees array
+            String employeeNames = 'N/A';
+            if (training['employees'] != null && training['employees'] is List) {
+              final employees = training['employees'] as List;
+              employeeNames = employees
+                  .map((emp) {
+                    if (emp is Map) {
+                      return emp['name']?.toString() ?? '';
+                    }
+                    return '';
+                  })
+                  .where((name) => name.isNotEmpty)
+                  .join(', ');
+              if (employeeNames.isEmpty) {
+                employeeNames = 'N/A';
+              }
+            }
+            
+            // Map API fields to UI expected fields
+            return {
+              ...training, // Keep all original fields for details page
+              'employee': employeeNames,
+              'trainer': training['trainer_name']?.toString() ?? '',
+            };
+          }).toList();
+          
+          // Update total from list length if API total wasn't provided
+          if (_total == 0) {
+            _total = _trainingList.length;
+          }
+        } else {
+          _trainingList = [];
+          if (_total == 0) {
+            _total = 0;
+          }
+        }
+
+        _status = TrainingStatus.success;
+        notifyListeners();
+      } else {
+        _status = TrainingStatus.error;
+        _errorMessage = response['message']?.toString() ?? 'Failed to load training list';
+        notifyListeners();
+      }
     } catch (e) {
       _status = TrainingStatus.error;
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
@@ -138,6 +121,30 @@ class TrainingViewModel extends ChangeNotifier {
 
   void refresh() {
     loadTrainingData();
+  }
+
+  /// Fetch training details by training_id
+  Future<dynamic> getTrainingDetails(String trainingId) async {
+    try {
+      // Get token from preferences
+      final token = await PreferencesHelper.getUserToken();
+
+      if (token == null || token.isEmpty) {
+        return null;
+      }
+
+      // Fetch training details from API
+      final response = await _remoteDataSource.getTrainingDetailById(token, trainingId);
+
+      if (response['status'] == true && response['data'] != null) {
+        // API returns data as object
+        return response['data'];
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error fetching training details: $e');
+      return null;
+    }
   }
 }
 

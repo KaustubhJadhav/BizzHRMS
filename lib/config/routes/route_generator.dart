@@ -10,6 +10,7 @@ import 'package:bizzhrms_flutter_app/presentation/projects/view/projects_page.da
 import 'package:bizzhrms_flutter_app/presentation/projects/view/project_details_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/announcements/view/announcements_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/complaints/view/complaints_page.dart';
+import 'package:bizzhrms_flutter_app/presentation/complaints/view/complaint_details_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/work_report/view/work_report_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/profile/view/profile_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/profile/view/change_password_page.dart';
@@ -19,13 +20,17 @@ import 'package:bizzhrms_flutter_app/presentation/admin_leave_management/view/ad
 import 'package:bizzhrms_flutter_app/presentation/splash/view/splash_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/awards/view/awards_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/tickets/view/tickets_page.dart';
+import 'package:bizzhrms_flutter_app/presentation/tickets/view/ticket_details_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/payroll/view/payroll_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/training/view/training_page.dart';
+import 'package:bizzhrms_flutter_app/presentation/training/view/training_details_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/performance/view/performance_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/transfers/view/transfers_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/promotions/view/promotions_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/warnings/view/warnings_page.dart';
+import 'package:bizzhrms_flutter_app/presentation/warnings/view/warning_details_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/travels/view/travels_page.dart';
+import 'package:bizzhrms_flutter_app/presentation/travels/view/travel_details_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/office_shift/view/office_shift_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/job_applied/view/job_applied_page.dart';
 import 'package:bizzhrms_flutter_app/presentation/job_interview/view/job_interview_page.dart';
@@ -96,6 +101,15 @@ class RouteGenerator {
           builder: (context) => const ComplaintsPage(),
           settings: settings,
         );
+      case AppConstants.routeComplaintDetails:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return SmoothPageRoute(
+          builder: (context) => ComplaintDetailsPage(
+            complaintId: args?['complaint_id']?.toString() ?? '',
+            initialComplaint: args?['complaint'] as Map<String, dynamic>?,
+          ),
+          settings: settings,
+        );
       case AppConstants.routeWorkReport:
         return SmoothPageRoute(
           builder: (context) => const WorkReportPage(),
@@ -148,6 +162,15 @@ class RouteGenerator {
           builder: (context) => const TicketsPage(),
           settings: settings,
         );
+      case AppConstants.routeTicketDetails:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return SmoothPageRoute(
+          builder: (context) => TicketDetailsPage(
+            ticketId: args?['ticket_id']?.toString() ?? '',
+            initialTicket: args?['ticket'] as Map<String, dynamic>?,
+          ),
+          settings: settings,
+        );
       case AppConstants.routePayroll:
         return SmoothPageRoute(
           builder: (context) => const PayrollPage(),
@@ -173,6 +196,15 @@ class RouteGenerator {
           builder: (context) => const TrainingPage(),
           settings: settings,
         );
+      case AppConstants.routeTrainingDetails:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return SmoothPageRoute(
+          builder: (context) => TrainingDetailsPage(
+            trainingId: args?['training_id']?.toString() ?? '',
+            initialTraining: args?['training'] as Map<String, dynamic>?,
+          ),
+          settings: settings,
+        );
       case AppConstants.routePerformance:
         return SmoothPageRoute(
           builder: (context) => const PerformancePage(),
@@ -193,9 +225,27 @@ class RouteGenerator {
           builder: (context) => const WarningsPage(),
           settings: settings,
         );
+      case AppConstants.routeWarningDetails:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return SmoothPageRoute(
+          builder: (context) => WarningDetailsPage(
+            warningId: args?['warning_id']?.toString() ?? '',
+            initialWarning: args?['warning'] as Map<String, dynamic>?,
+          ),
+          settings: settings,
+        );
       case AppConstants.routeTravels:
         return SmoothPageRoute(
           builder: (context) => const TravelsPage(),
+          settings: settings,
+        );
+      case AppConstants.routeTravelDetails:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return SmoothPageRoute(
+          builder: (context) => TravelDetailsPage(
+            travelId: args?['travel_id']?.toString() ?? '',
+            initialTravel: args?['travel'] as Map<String, dynamic>?,
+          ),
           settings: settings,
         );
       case AppConstants.routeOfficeShift:

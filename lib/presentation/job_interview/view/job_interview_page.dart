@@ -35,12 +35,10 @@ class _JobInterviewPageState extends State<JobInterviewPage> {
     if (_searchQuery.isNotEmpty) {
       jobInterviews = jobInterviews.where((item) {
         final jobTitle = item['job_title']?.toString().toLowerCase() ?? '';
-        final message = item['message']?.toString().toLowerCase() ?? '';
         final interviewPlace = item['interview_place']?.toString().toLowerCase() ?? '';
         final addedBy = item['added_by']?.toString().toLowerCase() ?? '';
         final query = _searchQuery.toLowerCase();
         return jobTitle.contains(query) ||
-            message.contains(query) ||
             interviewPlace.contains(query) ||
             addedBy.contains(query);
       }).toList();
@@ -114,10 +112,6 @@ class _JobInterviewPageState extends State<JobInterviewPage> {
                         _buildDetailRow(
                           'Job Title',
                           jobInterview['job_title']?.toString() ?? 'N/A',
-                        ),
-                        _buildDetailRow(
-                          'Message',
-                          jobInterview['message']?.toString() ?? 'N/A',
                         ),
                         _buildDetailRow(
                           'Interview Place',
@@ -437,15 +431,6 @@ class _JobInterviewPageState extends State<JobInterviewPage> {
                                           DataColumn(
                                             label: Row(
                                               children: [
-                                                Text('Message'),
-                                                SizedBox(width: 4),
-                                                Icon(Icons.swap_vert, size: 16),
-                                              ],
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: Row(
-                                              children: [
                                                 Text('Interview Place'),
                                                 SizedBox(width: 4),
                                                 Icon(Icons.swap_vert, size: 16),
@@ -498,22 +483,6 @@ class _JobInterviewPageState extends State<JobInterviewPage> {
                                                   style: const TextStyle(
                                                       fontSize: 14,
                                                       fontWeight: FontWeight.w500),
-                                                ),
-                                              ),
-                                              // Message
-                                              DataCell(
-                                                SizedBox(
-                                                  width: 200,
-                                                  child: Text(
-                                                    jobInterview['message']
-                                                            ?.toString() ??
-                                                        'N/A',
-                                                    style: const TextStyle(
-                                                        fontSize: 14),
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
                                                 ),
                                               ),
                                               // Interview Place

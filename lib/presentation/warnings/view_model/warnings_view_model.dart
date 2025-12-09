@@ -1,11 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:bizzhrms_flutter_app/core/utils/preferences_helper.dart';
+import 'package:bizzhrms_flutter_app/data/data_sources/remote_data_source.dart';
 
 enum WarningsStatus { initial, loading, success, error }
 
 class WarningsViewModel extends ChangeNotifier {
   WarningsStatus _status = WarningsStatus.initial;
   String? _errorMessage;
+  final RemoteDataSource _remoteDataSource = RemoteDataSource();
 
   WarningsStatus get status => _status;
   String? get errorMessage => _errorMessage;
@@ -32,16 +35,16 @@ class WarningsViewModel extends ChangeNotifier {
   Color getApprovalStatusColor(String status) => _getApprovalStatusColor(status);
 
   Color _getWarningTypeColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'verbal':
-        return Colors.blue;
-      case 'written':
-        return Colors.orange;
-      case 'final':
-        return Colors.red;
-      default:
-        return Colors.grey;
+    // Handle various warning type formats
+    final typeLower = type.toLowerCase();
+    if (typeLower.contains('verbal') || typeLower.contains('first')) {
+      return Colors.blue;
+    } else if (typeLower.contains('written') || typeLower.contains('second')) {
+      return Colors.orange;
+    } else if (typeLower.contains('final') || typeLower.contains('third')) {
+      return Colors.red;
     }
+    return Colors.grey;
   }
 
   Color getWarningTypeColor(String type) => _getWarningTypeColor(type);
@@ -51,97 +54,57 @@ class WarningsViewModel extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    // Simulate API delay
-    await Future.delayed(const Duration(milliseconds: 500));
-
     try {
-      // Dummy data matching the HTML table structure
-      _warningsList = [
-        {
-          'warning_date': '2024-12-01',
-          'subject': 'Late Arrival',
-          'warning_type': 'Verbal',
-          'approval_status': 'Approved',
-          'warning_by': 'HR Manager',
-          'details': 'Warning issued for repeated late arrivals to work.',
-        },
-        {
-          'warning_date': '2024-11-28',
-          'subject': 'Inappropriate Behavior',
-          'warning_type': 'Written',
-          'approval_status': 'Pending',
-          'warning_by': 'Department Head',
-          'details': 'Written warning for inappropriate behavior in the workplace.',
-        },
-        {
-          'warning_date': '2024-11-25',
-          'subject': 'Violation of Company Policy',
-          'warning_type': 'Written',
-          'approval_status': 'Approved',
-          'warning_by': 'HR Manager',
-          'details': 'Warning for violation of company policy regarding attendance.',
-        },
-        {
-          'warning_date': '2024-11-20',
-          'subject': 'Poor Performance',
-          'warning_type': 'Verbal',
-          'approval_status': 'Approved',
-          'warning_by': 'Supervisor',
-          'details': 'Verbal warning regarding poor performance and missed deadlines.',
-        },
-        {
-          'warning_date': '2024-11-18',
-          'subject': 'Final Warning',
-          'warning_type': 'Final',
-          'approval_status': 'Approved',
-          'warning_by': 'HR Director',
-          'details': 'Final warning issued for repeated policy violations.',
-        },
-        {
-          'warning_date': '2024-11-15',
-          'subject': 'Unprofessional Conduct',
-          'warning_type': 'Written',
-          'approval_status': 'Pending',
-          'warning_by': 'Manager',
-          'details': 'Warning for unprofessional conduct during client meetings.',
-        },
-        {
-          'warning_date': '2024-11-12',
-          'subject': 'Absenteeism',
-          'warning_type': 'Written',
-          'approval_status': 'Approved',
-          'warning_by': 'HR Manager',
-          'details': 'Written warning for excessive absenteeism without proper notice.',
-        },
-        {
-          'warning_date': '2024-11-10',
-          'subject': 'Code of Conduct Violation',
-          'warning_type': 'Verbal',
-          'approval_status': 'Rejected',
-          'warning_by': 'Department Head',
-          'details': 'Verbal warning for violation of company code of conduct.',
-        },
-        {
-          'warning_date': '2024-11-08',
-          'subject': 'Work Quality Issues',
-          'warning_type': 'Written',
-          'approval_status': 'Approved',
-          'warning_by': 'Supervisor',
-          'details': 'Warning regarding consistent work quality issues and errors.',
-        },
-        {
-          'warning_date': '2024-11-05',
-          'subject': 'Team Disruption',
-          'warning_type': 'Verbal',
-          'approval_status': 'Pending',
-          'warning_by': 'Team Lead',
-          'details': 'Verbal warning for behavior that disrupts team harmony.',
-        },
-      ];
+      // Get token from preferences
+      final token = await PreferencesHelper.getUserToken();
 
-      _total = _warningsList.length;
-      _status = WarningsStatus.success;
-      notifyListeners();
+      if (token == null || token.isEmpty) {
+        _status = WarningsStatus.error;
+        _errorMessage = 'User not authenticated';
+        notifyListeners();
+        return;
+      }
+
+      // Fetch warning list from API
+      final response = await _remoteDataSource.getWarningList(token);
+
+      if (response['status'] == true) {
+        // Use total from API response if available
+        if (response['total'] != null) {
+          _total = response['total'] is int 
+              ? response['total'] 
+              : int.tryParse(response['total'].toString()) ?? 0;
+        }
+
+        // Handle data array and map fields
+        if (response['data'] != null && response['data'] is List) {
+          _warningsList = (response['data'] as List).map((item) {
+            final warning = item as Map<String, dynamic>;
+            // Map API fields to UI expected fields
+            return {
+              ...warning, // Keep all original fields for details page
+              'details': warning['description']?.toString() ?? '', // Map description to details
+            };
+          }).toList();
+          
+          // Update total from list length if API total wasn't provided
+          if (_total == 0) {
+            _total = _warningsList.length;
+          }
+        } else {
+          _warningsList = [];
+          if (_total == 0) {
+            _total = 0;
+          }
+        }
+
+        _status = WarningsStatus.success;
+        notifyListeners();
+      } else {
+        _status = WarningsStatus.error;
+        _errorMessage = response['message']?.toString() ?? 'Failed to load warnings';
+        notifyListeners();
+      }
     } catch (e) {
       _status = WarningsStatus.error;
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
@@ -151,6 +114,30 @@ class WarningsViewModel extends ChangeNotifier {
 
   void refresh() {
     loadWarningsData();
+  }
+
+  /// Fetch warning details by warning_id
+  Future<dynamic> getWarningDetails(String warningId) async {
+    try {
+      // Get token from preferences
+      final token = await PreferencesHelper.getUserToken();
+
+      if (token == null || token.isEmpty) {
+        return null;
+      }
+
+      // Fetch warning details from API
+      final response = await _remoteDataSource.getWarningDetailById(token, warningId);
+
+      if (response['status'] == true && response['data'] != null) {
+        // API returns data as array
+        return response['data'];
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error fetching warning details: $e');
+      return null;
+    }
   }
 }
 

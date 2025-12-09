@@ -29,6 +29,32 @@ class AppConstants {
   static const String promotionListEndpoint = 'api_common/getPromotionList';
   static const String promotionDetailEndpoint =
       'api_common/getPromotionDetailById';
+  static const String jobAppliedListEndpoint = 'api_common/getJobAppliedList';
+  static const String jobInterviewListEndpoint =
+      'api_common/getJobInterviewList';
+  static const String complaintListEndpoint = 'api_common/getComplaintList';
+  static const String complaintDetailEndpoint =
+      'api_common/getComplaintDetailById';
+  static const String warningListEndpoint = 'api_common/getWarningList';
+  static const String warningDetailEndpoint = 'api_common/getWarningDetailById';
+  static const String travelListEndpoint = 'api_common/getTravelList';
+  static const String travelDetailEndpoint = 'api_common/getTravelDetailById';
+  static const String officeShiftListEndpoint = 'api_common/getOfficeShiftList';
+  static const String trainingListEndpoint = 'api_common/getTrainingList';
+  static const String trainingDetailEndpoint =
+      'api_common/getTrainingDetailById';
+  static const String ticketListEndpoint = 'api_ticket/getTicketList';
+  static const String ticketDetailEndpoint = 'api_ticket/getTicketDetailById';
+  static const String addTicketEndpoint = 'api_ticket/add_ticket';
+  static const String editTicketEndpoint = 'api_ticket/edit_ticket';
+  static const String addTicketCommentEndpoint =
+      'api_ticket/add_ticket_comment';
+  static const String deleteTicketCommentEndpoint =
+      'api_ticket/delete_ticket_comment';
+  static const String addTicketAttachmentEndpoint =
+      'api_ticket/add_ticket_attachment';
+  static const String deleteTicketAttachmentEndpoint =
+      'api_ticket/delete_ticket_attachment';
   static const String saveFCMTokenEndpoint = 'attendance/save_fcm_token';
   static const String adminDashboardEndpoint = 'admin/dashboard/';
   static const String adminEmployeesEndpoint = 'admin/employees';
@@ -63,6 +89,7 @@ class AppConstants {
   static const String routeProjectDetails = '/project-details';
   static const String routeAnnouncements = '/announcements';
   static const String routeComplaints = '/complaints';
+  static const String routeComplaintDetails = '/complaint-details';
   static const String routeWorkReport = '/work-report';
   static const String routeProfile = '/profile';
   static const String routeChangePassword = '/change-password';
@@ -72,16 +99,20 @@ class AppConstants {
   static const String routeAdminLeaveManagement = '/admin-leave-management';
   static const String routeAwards = '/awards';
   static const String routeTickets = '/tickets';
+  static const String routeTicketDetails = '/ticket-details';
   static const String routePayroll = '/payroll';
   static const String routePayslips = '/payslips';
   static const String routeAdvanceSalary = '/advance-salary';
   static const String routeAdvanceSalaryReport = '/advance-salary-report';
   static const String routeTraining = '/training';
+  static const String routeTrainingDetails = '/training-details';
   static const String routePerformance = '/performance';
   static const String routeTransfers = '/transfers';
   static const String routePromotions = '/promotions';
   static const String routeWarnings = '/warnings';
+  static const String routeWarningDetails = '/warning-details';
   static const String routeTravels = '/travels';
+  static const String routeTravelDetails = '/travel-details';
   static const String routeOfficeShift = '/office-shift';
   static const String routeJobApplied = '/job-applied';
   static const String routeJobInterview = '/job-interview';
