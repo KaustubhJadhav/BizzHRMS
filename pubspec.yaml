@@ -34,6 +34,9 @@ dependencies:
   uuid: ^4.2.1
   equatable: ^2.0.5
   
+  # Location Services
+  geolocator: ^12.0.0
+  
   # Image Picker
   image_picker: ^1.0.7
   

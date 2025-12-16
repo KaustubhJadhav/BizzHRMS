@@ -314,17 +314,21 @@ class RemoteDataSource extends BaseDataSource {
     }
   }
 
-  /// Set Clocking API - requires Bearer token, employee_id, and clock_state (clock_in or clock_out)
+  /// Set Clocking API - requires Bearer token, employee_id, clock_state (clock_in or clock_out), and location (lat/lng)
   /// Returns: {status: int, message: bool, data: {clock_state: String, time_id?: int}}
   Future<Map<String, dynamic>> setClocking(
     String token,
     String employeeId,
     String clockState,
+    double? latitude,
+    double? longitude,
   ) async {
     try {
       final requestData = {
         'employee_id': employeeId,
         'clock_state': clockState,
+        if (latitude != null) 'lat': latitude.toString(),
+        if (longitude != null) 'lng': longitude.toString(),
       };
 
       print('=== REMOTE DATA SOURCE: SET CLOCKING ===');

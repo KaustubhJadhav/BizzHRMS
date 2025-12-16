@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:bizzhrms_flutter_app/core/utils/preferences_helper.dart';
 import 'package:bizzhrms_flutter_app/core/constants/app_constants.dart';
 import 'package:bizzhrms_flutter_app/data/data_sources/remote_data_source.dart';
@@ -368,11 +369,77 @@ class HomeViewModel extends ChangeNotifier {
       // Use user_id as employee_id directly
       final employeeId = userId;
 
+      // Get device location
+      double? latitude;
+      double? longitude;
+      
+      try {
+        // Check if location services are enabled
+        bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!serviceEnabled) {
+          print('=== LOCATION: Location services are disabled ===');
+          _clockingStatus = ClockingStatus.error;
+          _errorMessage = 'Location services are disabled. Please enable location services to clock in/out.';
+          if (!_disposed) {
+            notifyListeners();
+          }
+          return false;
+        }
+
+        // Check location permissions
+        LocationPermission permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+          if (permission == LocationPermission.denied) {
+            print('=== LOCATION: Location permissions denied ===');
+            _clockingStatus = ClockingStatus.error;
+            _errorMessage = 'Location permissions are denied. Please grant location permission to clock in/out.';
+            if (!_disposed) {
+              notifyListeners();
+            }
+            return false;
+          }
+        }
+
+        if (permission == LocationPermission.deniedForever) {
+          print('=== LOCATION: Location permissions denied forever ===');
+          _clockingStatus = ClockingStatus.error;
+          _errorMessage = 'Location permissions are permanently denied. Please enable them in app settings.';
+          if (!_disposed) {
+            notifyListeners();
+          }
+          return false;
+        }
+
+        // Get current position
+        print('=== LOCATION: Getting current position ===');
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: const Duration(seconds: 10),
+        );
+        
+        latitude = position.latitude;
+        longitude = position.longitude;
+        
+        print('=== LOCATION: Position obtained ===');
+        print('Latitude: $latitude');
+        print('Longitude: $longitude');
+        print('');
+      } catch (e) {
+        print('=== LOCATION: Error getting location ===');
+        print('Error: $e');
+        print('');
+        // Continue with null lat/lng - API will handle it
+        // Some APIs might still work without location, or return appropriate error
+      }
+
       // Print request details
       print('=== CLOCKING API REQUEST ===');
       print('Endpoint: ${AppConstants.baseUrl}${AppConstants.setClockingEndpoint}');
       print('Employee ID: $employeeId');
       print('Clock State: $clockState');
+      print('Latitude: ${latitude ?? "N/A"}');
+      print('Longitude: ${longitude ?? "N/A"}');
       print('Token: ${token.substring(0, token.length > 20 ? 20 : token.length)}...');
       print('');
 
@@ -381,6 +448,8 @@ class HomeViewModel extends ChangeNotifier {
         token,
         employeeId,
         clockState,
+        latitude,
+        longitude,
       );
 
       if (_disposed) return false;
